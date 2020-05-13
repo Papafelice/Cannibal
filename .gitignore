@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+
+*.qm
+
+SPEC/
+build/
+dist/
+eggs/
+*.egg-info/
+.installed.cfg
+*.egg

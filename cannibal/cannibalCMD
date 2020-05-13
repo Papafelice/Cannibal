@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8; -*-
+"""
+Copyright (c) 2020 Felix Huber
+
+cannibalCmd ist a commandline frontend for pdftools
+to insert text or images to PDF files
+
+For the optional creation of QR codes, modules pyqrcode and pypng are needed
+
+cannibalCmd is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with cannibalCmd. If not, see <http://www.gnu.org/licenses/>.
+
+"""
+
+import sys
+import os
+import getopt
+from pdfTools import PdfDoc
+
+def main(argv):
+    text = None
+    image = None
+    pageNum = 0
+    fontsize = 11
+    fontname = "Helv"
+    doAll = False
+    doQR = False
+    
+    try:                                
+        opts, args = getopt.getopt(argv, "hQat:i:p:s:f:", ["help", "qrcode", "all", "text=", "image=", "page=", "size=", "font="])
+    except getopt.GetoptError:          
+        usage()                         
+        sys.exit(2)                     
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()                     
+            sys.exit()
+        elif opt in ("-Q", "--qrcode"):
+            doQR = True
+        elif opt in ("-a", "--all"):
+            doAll = True
+        elif opt in ("-t", "--text"):
+            text = arg
+        elif opt in ("-i", "--image"):
+            image = arg
+        elif opt in ("-t", "--text"):
+            text = arg
+        elif opt in ("-p", "--page"):
+            pageNum = arg
+        elif opt in ("-s", "--size"):
+            fontsize = arg
+        elif opt in ("-f", "--font"):
+            fontname = arg
+
+    document = "".join(args)
+    
+    if document and os.path.isfile(document):
+        pdf = PdfDoc()
+        canQR = pdf.canQR()
+        pdf.openPdf(document)
+        page = pdf.getPage(pageNum)    
+    
+        if text is not None:
+            pdf.addText(page, 100, 100, 200, 200, text, fontsize, fontname, doAll, doQR)
+        if image is not None:
+            pdf.addImage(page, 100, 100, 200, 200, image, doAll)
+        pdf.savePdf()
+    else:
+        usage()
+    
+def usage():
+    print("Usage: %s %s" % (sys.argv[0],
+          "[options] file.pdf\noptions:\n"\
+          "-h\t\tshow this help\n"\
+          "-Q\t\tinsert text as QR code\n"\
+          "-a\t\tinsert in all pages\n"\
+          "-t \"text\"\tinsert \"text\"\n"\
+          "-i imagefile\tinsert imagefile\n"\
+          "-p pagenum\tpage number (default 0)\n"\
+          "-s size\t\tfont size in points (default 11)\n"\
+          "-f font\t\tfont name (standard pdf fonts, default Helv)\n"))
+        
+if __name__ == "__main__":
+    main(sys.argv[1:])
