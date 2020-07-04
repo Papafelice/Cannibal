@@ -80,18 +80,18 @@ class PdfDoc:
         return ret
                     
     def printSignatures(self):
+        #return
         if self.doc is not None:
             for page in self.doc:
+                for field in page.widgets(types=(fitz.PDF_WIDGET_TYPE_TEXT,)):
+                    print("Text Name: %s, rect: %s, Label: %s, Value: %s, flags: %s, xref: %s" %  (field.field_name, field.rect,
+                        field.field_label, field.field_value,
+                        field.field_flags, field.xref))
                 for field in page.widgets(types=(fitz.PDF_WIDGET_TYPE_SIGNATURE,)):
                     print("Signature Name: %s, rect: %s, signed %s, flags: %s, xref: %s" %
                         (field.field_name, field.rect, field.is_signed,
                         field.field_flags, field.xref))
-                for field in page.widgets(types=(fitz.PDF_WIDGET_TYPE_TEXT,)):
-                    print("Text Name: %s, rect: %s, Label: %s, Value: %s, Font: %s, Size: %s, flags: %s, xref: %s" %
-                        (field.field_name, field.rect,
-                         field.field_label, field.field_value,
-                         field.text_font, field.text_fontsize,
-                        field.field_flags, field.xref))
+            return field.rect
 
     def isNewPdf(self):
         if not self.doc.name:
@@ -139,7 +139,7 @@ class PdfDoc:
     def getDoc(self):
         return self.doc
         
-    def insertPage(self, pageNum):
+    def insertPage(self, pageNum, w=595, h=842):
         """
         Insert a new empty page.
         :param pageNum: zero-based page number, page inserted before this page
@@ -148,7 +148,7 @@ class PdfDoc:
         """
 
         if self.doc is not None:
-            self.doc.insertPage(pageNum)
+            self.doc.insertPage(pageNum, width=w, height=h)
 
     def deletePage(self, pageNum):
         """
@@ -219,9 +219,9 @@ class PdfDoc:
             self.addImage(page, x0, y0, x1, y1, fileName, allPages, 0, direction)
             os.close(fd)
             os.remove(fileName)
-            return 0
         else:
-            rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
+            #rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
+            rect = fitz.Rect(x0, y0, x1, y1)
             if allPages is True:
                 count = 1
                 for page in self.doc:
@@ -231,12 +231,15 @@ class PdfDoc:
                         count += 1
                     except:
                         text2 = text
-                    ret = page.insertTextbox(rect, text2, fontsize=int(fontsize),
-                                             fontname=fontname, rotate=direction)
+                    page.insertTextbox(rect, text2, fontsize=int(fontsize),
+                            color=(0,0,0), fontname=fontname, rotate=direction)
             else:
-                ret = page.insertTextbox(rect, text, fontsize=int(fontsize),
-                                         fontname=fontname, rotate=direction)
-        return ret
+                try:
+                    text2 = text.format(page.number+1)
+                except:
+                    text2 = text
+                page.insertTextbox(rect, text2, fontsize=int(fontsize),
+                            color=(0,0,0), fontname=fontname, rotate=direction)
 
     def addImage(self, page, x0, y0, x1, y1, fileName, allPages=False, Angle=0, direction=0):
         """
@@ -251,7 +254,8 @@ class PdfDoc:
         :param direction: direction of image in 90 degree steps
         :return: -
         """
-        rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
+        #rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
+        rect = fitz.Rect(x0, y0, x1, y1)
         try:
             if int(Angle) != 0:
                 # Fixme: get rid of temp file
@@ -293,7 +297,8 @@ class PdfDoc:
         widget.text_fontsize = 11
         widget.field_value = "Text"
         
-        rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
+        #rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
+        rect = fitz.Rect(x0, y0, x1, y1)
         page.setRotation(0)
         #rect = fitz.Rect(x0, y0, x1, y1)
         widget.rect = rect  # where to locate the field
@@ -311,7 +316,6 @@ class PdfDoc:
         widget.field_name = "Signature1"
         widget.field_value = "Reference goes here"
         page.addWidget(widget)         # add the widget
-
 
 if __name__ == '__main__':
         

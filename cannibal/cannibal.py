@@ -24,7 +24,7 @@ Part of this module was copied from
 https://github.com/Rolf-Hempel/PlanetarySystemStacker
 """
 
-__version__ = '0.36.7' 
+__version__ = '0.36.9' 
 
 import os
 from sys import exit, argv, path
@@ -32,15 +32,19 @@ path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import platform
 
 import fitz
+if fitz.VersionBind.split(".") < ["1", "17", "2"]:
+    exit("PyMuPDF v1.17.2+ is needed.")
+
 from PyQt5 import QtGui
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtCore import Qt, QTranslator, QLocale, qVersion, QSettings
+from PyQt5.QtCore import Qt, QTranslator, QLocale, qVersion, QSettings, QPointF
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QApplication
 from PyQt5.QtWidgets import QMessageBox, QDialog, QLineEdit
 
 from main_gui import Ui_MainWindow
 from pdfTools import PdfDoc
 from addObjects import InsertTextDlg, InsertImageDlg, InsertStampDlg, InsertFileDlg
+from formEdit import EditFormText, EditFormList
 
 
 class Cannibal(QMainWindow):
@@ -75,32 +79,33 @@ class Cannibal(QMainWindow):
 
         icon = QtGui.QIcon(os.path.join(self.progPath, "icons", "sign.png"))
         self.ui.actionSign.setIcon(icon)
-        self.ui.actionQuit.triggered.connect(self.closeEvent)
-        self.ui.actionOpen.triggered.connect(self.openPdf)
-        self.ui.actionSave.triggered.connect(self.savePdf)
-        self.ui.actionSave_as.triggered.connect(self.savePdfAs)
-        self.ui.actionClose.triggered.connect(self.closePdf)
-        self.ui.actionDocument_Info.triggered.connect(self.documentInfo)
-        self.ui.actionSign.triggered.connect(self.sign)
-        self.ui.actionInsert_form.triggered.connect(self.insertForm)
-        self.ui.actionInsert_text.triggered.connect(self.insertText)
-        self.ui.actionInsert_image.triggered.connect(self.insertImage)
-        self.ui.actionInsert_stamp.triggered.connect(self.insertStamp)
-        self.ui.actionZoom_original.triggered.connect(self.zoomOriginal)
-        self.ui.actionZoom_fit_best.triggered.connect(self.zoomFitBest)
-        self.ui.actionZoom_in.triggered.connect(self.zoomIn)
-        self.ui.actionZoom_out.triggered.connect(self.zoomOut)
-        self.ui.actionRotate_left.triggered.connect(self.rotateLeft)
-        self.ui.actionRotate_right.triggered.connect(self.rotateRight)
-        self.ui.actionFirst_page.triggered.connect(self.firstPage)
-        self.ui.actionPrevious_page.triggered.connect(self.prevPage)
-        self.ui.actionNext_page.triggered.connect(self.nextPage)
-        self.ui.actionLast_page.triggered.connect(self.lastPage)
-        self.ui.actionDelete_page.triggered.connect(self.deletePage)
-        self.ui.actionInsert_page.triggered.connect(self.insertPage)
-        self.ui.actionAppend_page.triggered.connect(self.appendPage)
-        self.ui.actionInsert_document.triggered.connect(self.insertDocument)
-        self.ui.actionAbout.triggered.connect(self.aboutCannibal)
+        
+        # Connect to all menu triggers
+        self.ui.actionZoom_original.triggered.connect(self.ui.pdfView.zoomOriginal)
+        self.ui.actionZoom_fit_best.triggered.connect(self.ui.pdfView.zoomFitBest)
+        self.ui.actionZoom_in.triggered.connect(self.ui.pdfView.zoomIn)
+        self.ui.actionZoom_out.triggered.connect(self.ui.pdfView.zoomOut)
+        
+        self.ui.pdfView.leftMouseButtonReleased.connect(self.handleLeftMouse)
+        self.ui.pdfView.MouseMoved.connect(self.handleLeftMouseMove)
+
+        handlers = {
+        "Quit":"closeEvent",
+        "New":"newPdf", "Open":"openPdf", "Close":"closePdf",
+        "Save":"savePdf", "Save_as":"savePdfAs",
+        "Document_Info":"documentInfo",
+        "Sign":"sign", 
+        "Insert_form":"insertForm", "Insert_text":"insertText",
+        "Insert_image":"insertImage", "Insert_stamp":"insertStamp",
+        "Rotate_left":"rotateLeft", "Rotate_right":"rotateRight",
+        "First_page":"firstPage", "Previous_page":"prevPage",
+        "Next_page":"nextPage", "Last_page":"lastPage",
+        "Delete_page":"deletePage", "Insert_page":"insertPage", "Append_page":"appendPage",
+        "Insert_document":"insertDocument",
+        "About":"aboutCannibal"
+        }
+        for t, h in handlers.items():
+            self.connectTrigger(t, h)
         
         self.currPage = QLineEdit()
         self.currPage.setMaxLength(4)
@@ -152,9 +157,18 @@ class Cannibal(QMainWindow):
         self.pageNum = 0
         self.pageCount = 0
         self.page = None
-        
+        self.inField = False
+                
         if file is not None:
-            self.openPdf(file)
+            self.openPdf(file=file)
+        
+    def connectTrigger(self, trigger, handler):
+        """
+        Connect a handler to a trigger event
+        """
+        t=getattr(self.ui, "action%s" % trigger)
+        h=getattr(self, handler)
+        t.triggered.connect(h)
         
     def activateGuiElements(self, elements, enable):
         """
@@ -184,6 +198,7 @@ class Cannibal(QMainWindow):
             self.ui.splitter.setSizes([int(self.ui.splitter.size().width() * 0.2),
                                      int(self.ui.splitter.size().width() * 0.8)])
             widget.show()
+            #widget.layout.invalidate()
         else:
             widget.hide()
 
@@ -211,13 +226,10 @@ class Cannibal(QMainWindow):
                 
         self.setWindowTitle(title)
 
-    def getOpenFileName(self):
-        # Open the file dialog
-        fileName, dummy = QFileDialog.getOpenFileName(None, self.tr("Open File"),
-                          self.filePath, self.tr("PDF Files (*.pdf);; All files ()"))
-        return fileName
-
-    def openPdf(self, file=None):
+    def newPdf(self):
+        self.openPdf(newFile=True)
+        
+    def openPdf(self, file=None, newFile=False):
         """
         This method is invoked by selecting "Open" from the "file" menu.
 
@@ -225,39 +237,44 @@ class Cannibal(QMainWindow):
         """
         
         # check for file in memory
-        if not self.closePdf():
+        if not self.confirmChanged():
             return
-        if file is False:
-            fileName = self.getOpenFileName()
+        if newFile is False and file is False:
+            # Open the file dialog
+            fileName, dummy = QFileDialog.getOpenFileName(None, self.tr("Open File"),
+                        self.filePath, self.tr("PDF Files (*.pdf);; All files ()"))
+            if not fileName or not os.path.isfile(fileName):
+                return
         else:
             fileName = file
 
-        if fileName and os.path.isfile(fileName):
+        self.setDirty(False)
+        self.closePdf()
+        if newFile is True:
+            self.fileName = self.tr("NoName")
+        else:
             self.filePath, self.fileName = os.path.split(fileName) 
             
-            ret = self.pdf.openPdf(fileName)
-            if ret != 0:
-                                    
-                # Show the signature tree
-                self.showWidget(self.ui.tabs, pos=0)
-    
-                # Show the page view
-                self.showWidget(self.ui.pdfView, pos=1)
+        ret = self.pdf.openPdf(fileName)
+        if ret != 0:                                    
+            # Show the signature tree
+            self.showWidget(self.ui.tabs, pos=0)
+            # Show the page view
+            self.showWidget(self.ui.pdfView, pos=1)
+            # Activate GUI elements
+            self.activateGuiElements(self.guiElements, True)
 
-                # Activate GUI elements
-                self.activateGuiElements(self.guiElements, True)
-            
-                self.pageCount = self.pdf.getPageCount()
-                self.ui.pdfView.clear()
-                self.resetPreview()
-                self.firstPage()
-                self.isOpen = True
-                if ret == 2:
-                    self.fileName = self.tr("NoName")
-                    self.setDirty(True)
-                else:
-                    self.setDirty(False)
-                self.pdf.printSignatures()
+            if newFile:
+                self.pdf.insertPage(0)
+            self.pageCount = self.pdf.getPageCount()
+            self.ui.pdfView.clear()
+            self.resetPreview()
+            self.firstPage()
+            self.isOpen = True
+            if (ret == 2) or (newFile is True):
+                self.setDirty(True)
+            else:
+                self.setDirty(False)
             
     def savePdf(self):
         """
@@ -291,15 +308,15 @@ class Cannibal(QMainWindow):
             # close and reopen to sync pyMuPdf memory image
             self.setDirty(False)
             self.closePdf()
-            self.openPdf(filename)
+            self.openPdf(file=filename)
             return True
         return False
 
-    def closePdf(self):
+    def confirmChanged(self):
         """
-        close the current pdf
+        confirm losses of changed document
 
-        :return: True if pdf is saved or willingly abandoned
+        :return: False if user aborts
         """
         saved = True
         if self.isOpen and self.isDirty:
@@ -311,25 +328,34 @@ class Cannibal(QMainWindow):
                 saved = True
             else:
                 saved = False
-            
-            if saved is True:
-                self.ui.pdfView.clear()
-                self.page = None
-                self.ui.pdfView.clearPage()
-                self.pdf.closePdf()
-            
-                # Deactivate GUI elements
-                self.activateGuiElements(self.guiElements, False)
+        return saved
 
-                # Hide the tab area
-                self.showWidget(self.ui.tabs, show=False)
-    
-                # Hide the page view
-                self.showWidget(self.ui.pdfView, show=False)
+    def closePdf(self):
+        """
+        close the current pdf
+
+        :return: True if pdf is saved or willingly abandoned
+        """
+        saved = self.confirmChanged()
             
-                self.isOpen = False
-                self.fileName = None
-                self.setDirty(False)
+        if saved is True:
+            self.ui.pdfView.clear()
+            self.page = None
+            self.ui.pdfView.clearPage()
+            self.pdf.closePdf()
+            
+            # Deactivate GUI elements
+            self.activateGuiElements(self.guiElements, False)
+
+            # Hide the tab area
+            self.showWidget(self.ui.tabs, show=False)
+    
+            # Hide the page view
+            self.showWidget(self.ui.pdfView, show=False)
+            
+            self.isOpen = False
+            self.fileName = None
+            self.setDirty(False)
         return saved
             
     def showPage(self):
@@ -341,19 +367,6 @@ class Cannibal(QMainWindow):
         self.ui.pdfView.showPage(self.page)
         self.currPage.setText(str(self.pageNum+1))
         
-    def setPage(self, pNum):
-        """
-        select the current page in the preview
-        thereby triggering the update of the main view
-        """
-        if pNum >= self.pageCount:
-            pNum = self.pageCount-1
-        elif pNum < 0:
-            pNum = 0
-
-        self.currPage.setText(str(pNum+1))
-        self.ui.thumbs.setCurrentRow(pNum)
-
     def thumbChange(self, current, previous):
         """
         render the page that was selected in preview
@@ -381,17 +394,18 @@ class Cannibal(QMainWindow):
         self.ui.thumbs.resetPreview(self.pageCount, self.pageNum)
         self.fillPreview()
 
-    def zoomOriginal(self):
-        self.ui.pdfView.zoomOriginal()
-        
-    def zoomFitBest(self):
-        self.ui.pdfView.zoomFitBest()
-        
-    def zoomIn(self):
-        self.ui.pdfView.zoomIn()
+    def setPage(self, pNum):
+        """
+        select the current page in the preview
+        thereby triggering the update of the main view
+        """
+        if pNum >= self.pageCount:
+            pNum = self.pageCount-1
+        elif pNum < 0:
+            pNum = 0
 
-    def zoomOut(self):
-        self.ui.pdfView.zoomOut()
+        self.currPage.setText(str(pNum+1))
+        self.ui.thumbs.setCurrentRow(pNum)
 
     def firstPage(self):
         self.setPage(0)
@@ -468,7 +482,7 @@ class Cannibal(QMainWindow):
         """
         self.ui.pdfView.setPan(True)
         QApplication.restoreOverrideCursor()
-        # x,y are scaled mouse coordinates
+        # x,y are image coordinates
         # dispatch to worker 
         if self.mode is not None:
             insertFunction = getattr(self, "doInsert_%s" % self.mode)
@@ -478,7 +492,68 @@ class Cannibal(QMainWindow):
     def handleLeftButtonRelease(self, x, y):
         # print("mouse x,y %s %s" % (x, y))
         pass
-                        
+
+    def findField(self, x, y):
+        if self.mode is None:
+            p = fitz.Point(x,y)
+            inField = False
+            for field in self.page.widgets():
+                if field.rect.contains(p):
+                    inField = True
+                    break;
+            if inField is True:
+                return field
+        return None
+
+    def updateField(self, field):
+        field.update()
+        self.setDirty(True)
+        self.showPage()
+
+    def mapToGlobal(self, x, y):
+        p = QPointF(x, y)
+        pw = self.ui.pdfView.mapFromImg(p)
+        pg = self.ui.pdfView.mapToGlobal(pw)
+        return pg
+
+    def handleLeftMouse(self, x, y):
+        field = self.findField(x, y)
+        if field is None:
+            return
+        if field.field_type == fitz.PDF_WIDGET_TYPE_CHECKBOX:
+            field.field_value = False if field.field_value == "Yes" else True
+            self.updateField(field)
+        elif field.field_type == fitz.PDF_WIDGET_TYPE_TEXT:
+            pg = self.mapToGlobal(field.rect.x0, field.rect.y0)
+            dlg = EditFormText(pg, field.field_value)
+            if dlg.exec() == QDialog.Accepted:
+                field.field_value = dlg.getText()
+                self.updateField(field)
+        elif field.field_type == fitz.PDF_WIDGET_TYPE_COMBOBOX:
+            print("Combo FLags %s" % (hex(field.field_flags),))
+            pg = self.mapToGlobal(field.rect.x0, field.rect.y0)
+            dlg = EditFormList(pg)
+            dlg.fillList(field.choice_values)
+            dlg.setText(field.field_value)
+            if dlg.exec() == QDialog.Accepted:
+                field.field_value = dlg.getText()
+                self.updateField(field)
+        elif field.field_type == fitz.PDF_WIDGET_TYPE_SIGNATURE:
+            print("Signature Name: %s, signed %s, flags: %s, xref: %s" %
+                (field.field_name, field.is_signed, field.field_flags, field.xref))
+        else:
+            print("Field type %s unimplemented" % field.field_type)
+        
+    def handleLeftMouseMove(self, x, y):
+        field = self.findField(x, y)
+        if field is not None:
+            if self.inField is False:
+                QApplication.setOverrideCursor(Qt.PointingHandCursor)
+                self.inField = True
+        else:
+            QApplication.restoreOverrideCursor()
+            self.inField = False
+
     def sign(self):
         self.changeMode("Sign")
 
@@ -511,19 +586,15 @@ class Cannibal(QMainWindow):
 
         :return: -
         """
-        dlg = InsertTextDlg(self.settings)
+        dlg = InsertTextDlg(self.settings, x1-x0, y1-y0, self.pageNum)
         dlg.enableConvertQR(self.pdf.canQR())
         
         if dlg.exec() == QDialog.Accepted:
-            ret = self.pdf.addText(self.page, x0, y0, x1, y1,
-                                    dlg.getText(), dlg.getFontSize(),
-                                    dlg.getFontName(), dlg.getAllPages(),
-                                    dlg.getConvertQR(), self.page.rotation)
-            if ret < 0:
-                QMessageBox.question(self, self.tr("Error"), self.tr("Text too long/large"),
-                                     QMessageBox.Ok, QMessageBox.Ok)
-            else:
-                self.setDirty(True)
+            self.pdf.addText(self.page, x0, y0, x1, y1,
+                             dlg.getText(), dlg.getFontSize(),
+                             dlg.getFontName(), dlg.getAllPages(),
+                             dlg.getConvertQR(), self.page.rotation)
+            self.setDirty(True)
 
     def insertImage(self):
         self.changeMode("Image")
@@ -590,6 +661,7 @@ class Cannibal(QMainWindow):
         self.showMsgbox(aboutText.format(__version__, OS, PYTHON_VERSION, PYMUPDF_VERSION, QT_VERSION),
                         self.tr("About Cannibal"))
 
+        
     def closeEvent(self, event=None):
         """
         This event is triggered when the user closes the main window by clicking on the cross in
@@ -615,6 +687,7 @@ class Cannibal(QMainWindow):
             # No confirmation by the user: Don't stop program execution.
             if event:
                 event.ignore()
+
 
 def main():
     filePath = os.path.dirname(os.path.realpath(__file__))

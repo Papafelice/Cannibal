@@ -55,7 +55,7 @@ class Ui_InsertStamp(object):
 
     def retranslateUi(self, InsertStamp):
         _translate = QtCore.QCoreApplication.translate
-        InsertStamp.setWindowTitle(_translate("InsertStamp", "Add stamp"))
+        InsertStamp.setWindowTitle(_translate("InsertStamp", "Insert stamp"))
         self.everyPage.setText(_translate("InsertStamp", "On every page"))
         self.label.setText(_translate("InsertStamp", "Stamp"))
         self.label_2.setText(_translate("InsertStamp", "Angle"))

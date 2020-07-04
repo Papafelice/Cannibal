@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Add image</string>
+   <string>Insert image</string>
   </property>
   <property name="modal">
    <bool>true</bool>

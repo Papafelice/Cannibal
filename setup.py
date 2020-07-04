@@ -11,7 +11,7 @@ files = ["icons/*", "i18n/*.qm", "stamps/**/*"]
 
 setup(
     name = "cannibal",
-    version = "0.36.7",
+    version = "0.36.9",
     description = "PDF file viewer and annotator",
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -25,10 +25,10 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Programming Language :: Python :: 3 :: Only'
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.6',
     install_requires=[
           'pyqt5',
-          'pymupdf>=1.16.18',
+          'pymupdf>=1.17.2',
           'pyqrcode',
           'pypng'
     ],

@@ -24,29 +24,32 @@ import os.path
 from os import listdir
 import fitz
 
-from PyQt5.QtCore import Qt, QTranslator, QLocale, qVersion, QSettings, QRectF
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QFileDialog, QWidget
 from PyQt5.QtWidgets import QDialog, QGraphicsScene
 from PyQt5.QtGui import QImage, QPixmap, QTransform, QIntValidator
 
+from QtPdfViewer import ImgViewer, PdfViewer
 from addText import Ui_InsertText
 from addImage import Ui_InsertImage
 from addStamp import Ui_InsertStamp
 from addFile import Ui_InsertFile
 from pdfTools import PdfDoc
-from QtPdfViewer import ImgViewer, PdfViewer
 
 class InsertTextDlg(QDialog):
     """
     A class to show a dialog where the user can enter text to be inserted 
     """
 
-    def __init__(self, settings):
+    def __init__(self, settings, w, h, pageNum):
         super().__init__()
         self.ui = Ui_InsertText()
         self.ui.setupUi(self)
 
         self.settings = settings
+        self.w = w
+        self.h = h
+        self.pageNum = pageNum
         
         # fill in standard PDF font names
         for k, v in fitz.Base14_fontdict.items():
@@ -65,7 +68,18 @@ class InsertTextDlg(QDialog):
         except:
             pass
 
+        # create an empty PDF for the preview
+        self.pdf = PdfDoc()
+        self.pdf.openPdf()
+        self.pdf.insertPage(0, self.w, self.h)
+
+        # handlers for the changed fields
+        self.ui.userText.textChanged.connect(self.setPreview)
+        self.ui.fontSize.textChanged.connect(self.setPreview)
+        self.ui.fontName.currentTextChanged.connect(self.setPreview)
+
         self.show()
+        self.setPreview()
 
     def getText(self):
         return self.ui.userText.toPlainText()
@@ -85,10 +99,25 @@ class InsertTextDlg(QDialog):
     def enableConvertQR(self, enable):
         self.ui.convertQR.setEnabled(enable)
 
+    def setPreview(self):
+        self.pdf.deletePage(0)
+        self.pdf.insertPage(0, self.w, self.h)
+        page = self.pdf.getPage(0)
+        try:
+            text2 = self.getText().format(self.pageNum+1)
+        except:
+            text2 = self.getText()
+        ret = self.pdf.addText(page, 0, 0, self.w, self.h,
+                               text2, self.getFontSize(),
+                               self.getFontName(), False,
+                               False, 0)
+        self.ui.pdfView.showPage(page)
+            
     def accept(self):
         self.settings.setValue('Insert/Text', self.getText())
         self.settings.setValue('Insert/FontSize', self.getFontSize())
         self.settings.setValue('Insert/FontName', self.getFontName())
+        self.pdf.closePdf()
         self.done(QDialog.Accepted)
 
 
@@ -258,7 +287,6 @@ class InsertStampDlg(QDialog):
                 image = image.transformed(transform)
             self.imgView.setImage(image)
         except:
-            raise
             pass
 
     def accept(self):
@@ -279,11 +307,6 @@ class InsertFileDlg(QDialog):
         self.ui.setupUi(self)
         
         self.settings = settings
-
-        # pdf viewer instance for the preview
-        self.pdfView = PdfViewer()
-        self.ui.horizontalLayout.insertWidget(0, self.pdfView)
-        self.pdfView.show()
                 
         # handler for the button
         self.ui.chooseFile.clicked.connect(self.chooseFile)
@@ -327,11 +350,10 @@ class InsertFileDlg(QDialog):
         self.pdf = PdfDoc()
         ret = self.pdf.openPdf(self.getFileName())
         if ret != 0:
-            self.pdfView.showPage(self.pdf.getPage(0))
+            self.ui.pdfView.showPage(self.pdf.getPage(0))
         else:
             self.doc = None
 
     def accept(self):
         self.settings.setValue('Insert/InsertFile', self.getFileName())
         self.done(QDialog.Accepted)
-

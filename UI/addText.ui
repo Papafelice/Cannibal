@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>474</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>240</y>
+     <y>430</y>
      <width>341</width>
      <height>32</height>
     </rect>
@@ -36,9 +36,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>10</y>
+     <y>220</y>
      <width>351</width>
-     <height>111</height>
+     <height>91</height>
     </rect>
    </property>
   </widget>
@@ -46,7 +46,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>200</y>
+     <y>390</y>
      <width>151</width>
      <height>28</height>
     </rect>
@@ -59,7 +59,7 @@
    <property name="geometry">
     <rect>
      <x>200</x>
-     <y>200</y>
+     <y>390</y>
      <width>171</width>
      <height>28</height>
     </rect>
@@ -72,7 +72,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>120</y>
+     <y>310</y>
      <width>91</width>
      <height>24</height>
     </rect>
@@ -85,7 +85,7 @@
    <property name="geometry">
     <rect>
      <x>290</x>
-     <y>120</y>
+     <y>310</y>
      <width>61</width>
      <height>24</height>
     </rect>
@@ -98,7 +98,7 @@
    <property name="geometry">
     <rect>
      <x>290</x>
-     <y>150</y>
+     <y>340</y>
      <width>61</width>
      <height>41</height>
     </rect>
@@ -108,13 +108,30 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>150</y>
+     <y>340</y>
      <width>261</width>
      <height>41</height>
     </rect>
    </property>
   </widget>
+  <widget class="PdfViewer" name="pdfView">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>351</width>
+     <height>192</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PdfViewer</class>
+   <extends>QGraphicsView</extends>
+   <header>QtPdfViewer</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

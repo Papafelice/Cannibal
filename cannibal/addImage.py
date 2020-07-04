@@ -46,7 +46,7 @@ class Ui_InsertImage(object):
 
     def retranslateUi(self, InsertImage):
         _translate = QtCore.QCoreApplication.translate
-        InsertImage.setWindowTitle(_translate("InsertImage", "Add image"))
+        InsertImage.setWindowTitle(_translate("InsertImage", "Insert image"))
         self.everyPage.setText(_translate("InsertImage", "On every page"))
         self.label.setText(_translate("InsertImage", "Image"))
         self.chooseFile.setText(_translate("InsertImage", "Choose..."))

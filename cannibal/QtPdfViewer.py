@@ -25,7 +25,7 @@ along with QtPdfViewer. If not, see <http://www.gnu.org/licenses/>.
 
 import os
 from sys import argv
-from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, QRectF, QPointF, pyqtSignal, QSize
 from PyQt5.QtGui import QImage, QPixmap, QPainterPath, QIcon
 from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsScene, QFileDialog
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem, QListView
@@ -41,7 +41,8 @@ class ImgViewer(QGraphicsView):
         Left mouse button drag: Pan image        (canPan = True)
                                 Select rectangle (canPan = False)
     """
-    # Mouse button signals emit in image scene (x, y) coordinates.
+    # Mouse button signals emit in image (x, y) coordinates.
+    MouseMoved = pyqtSignal(float, float)
     leftMouseButtonPressed = pyqtSignal(float, float)
     leftMouseButtonReleased = pyqtSignal(float, float)
     leftMouseRectReleased = pyqtSignal(float, float, float, float)
@@ -66,6 +67,8 @@ class ImgViewer(QGraphicsView):
         # Scroll bar behaviour.
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        
+        self.setMouseTracking(True)
 
         self.clear()
 
@@ -81,27 +84,50 @@ class ImgViewer(QGraphicsView):
         """
         self.canPan = pan
 
+    def mapToImg(self, pos):
+        """ Convert to muPDF coordinates (always 72DPI)
+        """
+        p = QPointF()
+        scenePos = self.mapToScene(pos)
+        p.setX(scenePos.x()/self.zoom/self.scale)
+        p.setY(scenePos.y()/self.zoom/self.scale)
+        return p
+
+    def mapFromImg(self, pos):
+        """ Convert from muPDF coordinates
+        """
+        p = QPointF()
+        p.setX(pos.x()*self.zoom*self.scale)
+        p.setY(pos.y()*self.zoom*self.scale)
+        screenPos = self.mapFromScene(p)
+        return screenPos
+
+    def mouseMoveEvent(self, event):
+        QGraphicsView.mouseMoveEvent(self, event)
+        imgPos = self.mapToImg(event.pos())
+        self.MouseMoved.emit(imgPos.x(), imgPos.y())
+        
     def mousePressEvent(self, event):
         """ Start mouse pan or rect select mode.
         """
-        scenePos = self.mapToScene(event.pos())
+        imgPos = self.mapToImg(event.pos())
         if event.button() == Qt.LeftButton:
             if self.canPan:
                 self.setDragMode(QGraphicsView.ScrollHandDrag)
             else:
                 self.setDragMode(QGraphicsView.RubberBandDrag)
-            self.leftMouseButtonPressed.emit(scenePos.x(), scenePos.y())
+            self.leftMouseButtonPressed.emit(imgPos.x(), imgPos.y())
         QGraphicsView.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
         """ Stop mouse pan or rect select mode.
         """
         QGraphicsView.mouseReleaseEvent(self, event)
-        scenePos = self.mapToScene(event.pos())
+        imgPos = self.mapToImg(event.pos())
         if event.button() == Qt.LeftButton:
             if self.canPan:
                 self.setDragMode(QGraphicsView.NoDrag)
-                self.leftMouseButtonReleased.emit(scenePos.x(), scenePos.y())
+                self.leftMouseButtonReleased.emit(imgPos.x(), imgPos.y())
             else:
                 rect = self.scene.selectionArea().boundingRect()
                 # Clear selection area.

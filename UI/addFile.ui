@@ -90,9 +90,20 @@
      <height>421</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout"/>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="PdfViewer" name="pdfView"/>
+    </item>
+   </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PdfViewer</class>
+   <extends>QGraphicsView</extends>
+   <header>QtPdfViewer</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

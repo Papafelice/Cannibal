@@ -29,4 +29,5 @@ def convertUi(root=os.curdir):
 convertUi(os.curdir)
 os.chdir("../cannibal/i18n")
 subprocess.call(["pylupdate5", "cannibal.pro"])
-subprocess.call(["linguist-qt5", "cannibal_de.ts"])
+subprocess.call(["linguist-qt5", "cannibal_de.ts", "cannibal_fr.ts"])
+subprocess.call(["lrelease-qt5", "cannibal_de.ts", "cannibal_fr.ts"])

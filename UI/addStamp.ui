@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Add stamp</string>
+   <string>Insert stamp</string>
   </property>
   <property name="modal">
    <bool>true</bool>

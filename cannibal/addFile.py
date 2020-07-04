@@ -38,6 +38,9 @@ class Ui_InsertFile(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.pdfView = PdfViewer(self.horizontalLayoutWidget)
+        self.pdfView.setObjectName("pdfView")
+        self.horizontalLayout.addWidget(self.pdfView)
 
         self.retranslateUi(InsertFile)
         self.buttonBox.accepted.connect(InsertFile.accept)
@@ -50,3 +53,4 @@ class Ui_InsertFile(object):
         self.append.setText(_translate("InsertFile", "Append"))
         self.label.setText(_translate("InsertFile", "File"))
         self.chooseFile.setText(_translate("InsertFile", "Choose..."))
+from QtPdfViewer import PdfViewer
