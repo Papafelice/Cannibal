@@ -1,4 +1,9 @@
-#from distutils.core import setup
+#Build instructions
+#
+#   python3 setup.py bdist_rpm
+#or
+#   python3 setup.py bdist_wheel
+
 from setuptools import setup
 
 # read the contents of README.md

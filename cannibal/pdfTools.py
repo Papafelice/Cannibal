@@ -241,6 +241,25 @@ class PdfDoc:
                 page.insertTextbox(rect, text2, fontsize=int(fontsize),
                             color=(0,0,0), fontname=fontname, rotate=direction)
 
+    def compensateRotation(self, x0, y0, x1, y1, angle):
+        """
+        Compensate the shrinking of an image when rotated
+        """
+        from math import cos
+        angle = angle % 90
+        if angle > 45:
+            angle = 90 - angle
+        scale = cos(angle/180*3.14)
+        xc = (x0+x1)/2
+        yc = (y0+y1)/2
+        xs = (x1-x0)/2/scale
+        ys = (y1-y0)/2/scale
+        x0 = xc-xs
+        x1 = xc+xs
+        y0 = yc-ys
+        y1 = yc+ys
+        return fitz.Rect(x0, y0, x1, y1)
+
     def addImage(self, page, x0, y0, x1, y1, fileName, allPages=False, Angle=0, direction=0):
         """
         Insert image(s) into document.
@@ -254,10 +273,10 @@ class PdfDoc:
         :param direction: direction of image in 90 degree steps
         :return: -
         """
-        #rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
         rect = fitz.Rect(x0, y0, x1, y1)
         try:
             if int(Angle) != 0:
+                rect = self.compensateRotation(x0, y0, x1, y1, Angle)
                 # Fixme: get rid of temp file
                 transform = QTransform()
                 transform.rotate(-Angle)
@@ -292,15 +311,16 @@ class PdfDoc:
         widget = fitz.Widget()                 # create a new empty widget object
         widget.field_type = fitz.PDF_WIDGET_TYPE_TEXT
         widget.field_name = "Textfield%s" % self.textNum
+        widget.border_color = (0.7,)
+        widget.border_width = (1)
+        widget.fill_color = (0.98,)
         self.textNum += 1
         #widget.flags = 4096
         widget.text_fontsize = 11
         widget.field_value = "Text"
         
-        #rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
         rect = fitz.Rect(x0, y0, x1, y1)
         page.setRotation(0)
-        #rect = fitz.Rect(x0, y0, x1, y1)
         widget.rect = rect  # where to locate the field
         page.addWidget(widget)         # add the widget
         page.setRotation(rotation)

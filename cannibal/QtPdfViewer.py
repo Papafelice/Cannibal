@@ -78,6 +78,7 @@ class ImgViewer(QGraphicsView):
         self.zoom = 1
         self.pWidth = 1
         self.pHeight = 1
+        self.scale = 1
         
     def setPan(self, pan=True):
         """ Set panning mode
@@ -209,7 +210,6 @@ class PdfViewer(ImgViewer):
         super().__init__(parent)
 
         self.page = None
-        self.scale = 1
 
     def clearPage(self):
         self.page = None

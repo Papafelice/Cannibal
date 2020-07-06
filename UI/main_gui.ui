@@ -56,7 +56,7 @@
      <x>0</x>
      <y>0</y>
      <width>756</width>
-     <height>36</height>
+     <height>34</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -73,7 +73,6 @@
     <addaction name="actionSave"/>
     <addaction name="actionSave_as"/>
     <addaction name="separator"/>
-    <addaction name="actionPrint_setup"/>
     <addaction name="actionPrint"/>
     <addaction name="separator"/>
     <addaction name="actionDocument_Info"/>
@@ -164,6 +163,7 @@
    <addaction name="actionNew"/>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
+   <addaction name="actionPrint"/>
    <addaction name="separator"/>
    <addaction name="actionSign"/>
    <addaction name="separator"/>
@@ -219,15 +219,6 @@
     <string>Save &amp;as...</string>
    </property>
   </action>
-  <action name="actionPrint_setup">
-   <property name="icon">
-    <iconset theme="document-print-preview">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Print set&amp;up...</string>
-   </property>
-  </action>
   <action name="actionPrint">
    <property name="icon">
     <iconset theme="document-print">
@@ -261,11 +252,6 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionSelect_all">
-   <property name="text">
-    <string>&amp;Delete page</string>
-   </property>
-  </action>
   <action name="actionSign">
    <property name="icon">
     <iconset>
@@ -296,11 +282,6 @@
   <action name="actionInsert_image">
    <property name="text">
     <string>Insert &amp;image...</string>
-   </property>
-  </action>
-  <action name="actionMinimize">
-   <property name="text">
-    <string>&amp;Minimize</string>
    </property>
   </action>
   <action name="actionHelp">

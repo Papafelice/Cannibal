@@ -34,12 +34,20 @@ import platform
 import fitz
 if fitz.VersionBind.split(".") < ["1", "17", "2"]:
     exit("PyMuPDF v1.17.2+ is needed.")
+    
+try:
+    import cups
+    haveCups = True
+except:
+    haveCups = False
+    
 
 from PyQt5 import QtGui
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import Qt, QTranslator, QLocale, qVersion, QSettings, QPointF
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QApplication
 from PyQt5.QtWidgets import QMessageBox, QDialog, QLineEdit
+from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 
 from main_gui import Ui_MainWindow
 from pdfTools import PdfDoc
@@ -85,10 +93,6 @@ class Cannibal(QMainWindow):
         self.ui.actionZoom_fit_best.triggered.connect(self.ui.pdfView.zoomFitBest)
         self.ui.actionZoom_in.triggered.connect(self.ui.pdfView.zoomIn)
         self.ui.actionZoom_out.triggered.connect(self.ui.pdfView.zoomOut)
-        
-        self.ui.pdfView.leftMouseButtonReleased.connect(self.handleLeftMouse)
-        self.ui.pdfView.MouseMoved.connect(self.handleLeftMouseMove)
-
         handlers = {
         "Quit":"closeEvent",
         "New":"newPdf", "Open":"openPdf", "Close":"closePdf",
@@ -104,6 +108,9 @@ class Cannibal(QMainWindow):
         "Insert_document":"insertDocument",
         "About":"aboutCannibal"
         }
+        if haveCups:
+            handlers["Print"]  = "print"
+
         for t, h in handlers.items():
             self.connectTrigger(t, h)
         
@@ -121,7 +128,7 @@ class Cannibal(QMainWindow):
         self.ui.thumbs.scrollDown.connect(self.nextPage)
         
         self.guiElements = [self.ui.actionSave, self.ui.actionSave_as,
-                            self.ui.actionPrint_setup, self.ui.actionPrint,
+                            self.ui.actionPrint,
                             self.ui.actionClose, self.ui.actionDocument_Info,
                             self.ui.actionSign, self.ui.actionSign_invisibly,
                             self.ui.actionInsert_text, self.ui.actionInsert_image,
@@ -148,6 +155,7 @@ class Cannibal(QMainWindow):
         # mouse handlers
         self.ui.pdfView.leftMouseRectReleased.connect(self.handleLeftRectRelease)
         self.ui.pdfView.leftMouseButtonReleased.connect(self.handleLeftButtonRelease)
+        self.ui.pdfView.MouseMoved.connect(self.handleMouseMoved)
 
         # Initialize variables
         self.mode = None
@@ -357,7 +365,19 @@ class Cannibal(QMainWindow):
             self.fileName = None
             self.setDirty(False)
         return saved
-            
+
+    def print(self):
+        printer = QPrinter(QPrinter.HighResolution)
+        printDialog = QPrintDialog(printer, self)
+        if printDialog.exec_() == QDialog.Accepted:
+            print("Dialog: %s" % printDialog.printer().printerName())
+            conn = cups.Connection()
+            printers = conn.getPrinters()
+            for printer in printers:
+                print(printer, printers[printer]["device-uri"])
+            #conn.printFile(printer_name,'/home/pi/Desktop/tempprint.jpg',"Hello",{})
+            pass
+        
     def showPage(self):
         """
         render and show the current page
@@ -366,6 +386,9 @@ class Cannibal(QMainWindow):
         self.page = self.pdf.getPage(self.pageNum)
         self.ui.pdfView.showPage(self.page)
         self.currPage.setText(str(self.pageNum+1))
+        for field in self.page.widgets():
+                print( field.xref)
+        print("")
         
     def thumbChange(self, current, previous):
         """
@@ -467,7 +490,7 @@ class Cannibal(QMainWindow):
     def changeMode(self, mode):
         """
         change the working mode from pan to mouse rectangle selection
-        release of mouse calls dispatcher function
+        release of left button calls the mode dispatcher function
 
         :return: -
         """
@@ -476,6 +499,33 @@ class Cannibal(QMainWindow):
             self.mode = mode
             QApplication.setOverrideCursor(Qt.CrossCursor)
 
+    def setHandCursor(self, setOn=False):
+        """
+        change mouse cursor to hand symbol
+
+        :return: -
+        """
+        if setOn is True:
+            if self.inField is False:
+                QApplication.setOverrideCursor(Qt.PointingHandCursor)
+                self.inField = True
+        else:
+            if self.inField is True:
+                QApplication.restoreOverrideCursor()
+                self.inField = False
+        
+    def handleMouseMoved(self, x, y):
+        """
+        check if mouse is over a form widget
+
+        :return: -
+        """
+        field = self.findField(x, y)
+        if field is not None:
+            self.setHandCursor(True)
+        else:
+            self.setHandCursor(False)
+ 
     def handleLeftRectRelease(self, x0, y0, x1, y1):
         """
         Dispatch mouse rect to initiating function
@@ -489,11 +539,10 @@ class Cannibal(QMainWindow):
             insertFunction(x0, y0, x1, y1)
             self.mode = None
 
-    def handleLeftButtonRelease(self, x, y):
-        # print("mouse x,y %s %s" % (x, y))
-        pass
-
     def findField(self, x, y):
+        """
+        check wjether mouse is over a form widget
+        """
         if self.mode is None:
             p = fitz.Point(x,y)
             inField = False
@@ -511,15 +560,19 @@ class Cannibal(QMainWindow):
         self.showPage()
 
     def mapToGlobal(self, x, y):
+        """
+        convert pdf coordinates to absolute screen cordinates
+        """
         p = QPointF(x, y)
         pw = self.ui.pdfView.mapFromImg(p)
         pg = self.ui.pdfView.mapToGlobal(pw)
         return pg
 
-    def handleLeftMouse(self, x, y):
+    def handleLeftButtonRelease(self, x, y):
         field = self.findField(x, y)
         if field is None:
             return
+        self.setHandCursor(False)
         if field.field_type == fitz.PDF_WIDGET_TYPE_CHECKBOX:
             field.field_value = False if field.field_value == "Yes" else True
             self.updateField(field)
@@ -539,21 +592,13 @@ class Cannibal(QMainWindow):
                 field.field_value = dlg.getText()
                 self.updateField(field)
         elif field.field_type == fitz.PDF_WIDGET_TYPE_SIGNATURE:
-            print("Signature Name: %s, signed %s, flags: %s, xref: %s" %
-                (field.field_name, field.is_signed, field.field_flags, field.xref))
+            print("Signature Name: %s, signed %s, value: %s, flags: %s, xref: %s" %
+                (field.field_name, field.is_signed, field.field_value, field.field_flags, field.xref))
+            doc = self.pdf.getDoc()
+            print(doc.xrefObject(field.xref, compressed=False))
         else:
             print("Field type %s unimplemented" % field.field_type)
         
-    def handleLeftMouseMove(self, x, y):
-        field = self.findField(x, y)
-        if field is not None:
-            if self.inField is False:
-                QApplication.setOverrideCursor(Qt.PointingHandCursor)
-                self.inField = True
-        else:
-            QApplication.restoreOverrideCursor()
-            self.inField = False
-
     def sign(self):
         self.changeMode("Sign")
 
