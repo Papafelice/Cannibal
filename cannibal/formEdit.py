@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import QDialog, QComboBox
 from formText import Ui_TextEdit
 from formList import Ui_ListEdit
 
+
 class EditFormText(QDialog):
     """
     A class to edit a text form field

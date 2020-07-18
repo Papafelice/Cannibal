@@ -2,7 +2,7 @@
 """
 Copyright (c) 2020 Felix Huber
 
-treeview.py: herlper functions to show PDF signature data
+treeview.py: helper functions to show PDF signature data
 
 treeview.py is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

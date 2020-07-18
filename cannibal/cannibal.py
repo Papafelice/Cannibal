@@ -24,7 +24,7 @@ Part of this module was copied from
 https://github.com/Rolf-Hempel/PlanetarySystemStacker
 """
 
-__version__ = '0.36.9' 
+__version__ = '0.36.15' 
 
 import os
 from sys import exit, argv, path
@@ -34,13 +34,6 @@ import platform
 import fitz
 if fitz.VersionBind.split(".") < ["1", "17", "2"]:
     exit("PyMuPDF v1.17.2+ is needed.")
-    
-try:
-    import cups
-    haveCups = True
-except:
-    haveCups = False
-    
 
 from PyQt5 import QtGui
 from PyQt5.QtGui import QIntValidator
@@ -68,7 +61,6 @@ class Cannibal(QMainWindow):
         :param parent: None
         """
 
-        # The (generated) QtGui class is contained in module main_gui.py.
         super().__init__(parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -94,22 +86,22 @@ class Cannibal(QMainWindow):
         self.ui.actionZoom_in.triggered.connect(self.ui.pdfView.zoomIn)
         self.ui.actionZoom_out.triggered.connect(self.ui.pdfView.zoomOut)
         handlers = {
-        "Quit":"closeEvent",
-        "New":"newPdf", "Open":"openPdf", "Close":"closePdf",
-        "Save":"savePdf", "Save_as":"savePdfAs",
-        "Document_Info":"documentInfo",
-        "Sign":"sign", 
-        "Insert_form":"insertForm", "Insert_text":"insertText",
-        "Insert_image":"insertImage", "Insert_stamp":"insertStamp",
-        "Rotate_left":"rotateLeft", "Rotate_right":"rotateRight",
-        "First_page":"firstPage", "Previous_page":"prevPage",
-        "Next_page":"nextPage", "Last_page":"lastPage",
-        "Delete_page":"deletePage", "Insert_page":"insertPage", "Append_page":"appendPage",
-        "Insert_document":"insertDocument",
-        "About":"aboutCannibal"
+            "Quit": "closeEvent",
+            "New": "newPdf", "Open": "openPdf", "Close": "closePdf",
+            "Save": "savePdf", "Save_as": "savePdfAs",
+            "Document_Info": "documentInfo",
+            "Sign": "sign",
+            "Insert_form": "insertForm", "Insert_text": "insertText",
+            "Insert_image": "insertImage", "Insert_stamp": "insertStamp",
+            "Rotate_left": "rotateLeft", "Rotate_right": "rotateRight",
+            "First_page": "firstPage", "Previous_page": "prevPage",
+            "Next_page": "nextPage", "Last_page": "lastPage",
+            "Delete_page": "deletePage", "Insert_page": "insertPage",
+            "Append_page": "appendPage", "Clean_page": "cleanPage",
+            "Insert_document": "insertDocument",
+            "About": "aboutCannibal"
         }
-        if haveCups:
-            handlers["Print"]  = "print"
+        handlers["Print"] = "print"
 
         for t, h in handlers.items():
             self.connectTrigger(t, h)
@@ -126,6 +118,8 @@ class Cannibal(QMainWindow):
         self.ui.thumbs.verticalScrollBar().valueChanged.connect(self.fillPreview)
         self.ui.thumbs.scrollUp.connect(self.prevPage)
         self.ui.thumbs.scrollDown.connect(self.nextPage)
+        self.ui.thumbs.dropped.connect(self.thumbDropped)
+
         
         self.guiElements = [self.ui.actionSave, self.ui.actionSave_as,
                             self.ui.actionPrint,
@@ -134,7 +128,8 @@ class Cannibal(QMainWindow):
                             self.ui.actionInsert_text, self.ui.actionInsert_image,
                             self.ui.actionInsert_stamp, self.ui.actionInsert_form,
                             self.ui.actionDelete_page, self.ui.actionInsert_page,
-                            self.ui.actionAppend_page, self.ui.actionInsert_document,
+                            self.ui.actionAppend_page, self.ui.actionClean_page,
+                            self.ui.actionInsert_document,
                             self.ui.actionZoom_original, self.ui.actionZoom_fit_best,
                             self.ui.actionZoom_in, self.ui.actionZoom_out,
                             self.ui.actionRotate_left, self.ui.actionRotate_right,
@@ -174,8 +169,8 @@ class Cannibal(QMainWindow):
         """
         Connect a handler to a trigger event
         """
-        t=getattr(self.ui, "action%s" % trigger)
-        h=getattr(self, handler)
+        t = getattr(self.ui, "action%s" % trigger)
+        h = getattr(self, handler)
         t.triggered.connect(h)
         
     def activateGuiElements(self, elements, enable):
@@ -204,9 +199,10 @@ class Cannibal(QMainWindow):
                 # new widget: insert it
                 self.ui.splitter.insertWidget(pos, widget)
             self.ui.splitter.setSizes([int(self.ui.splitter.size().width() * 0.2),
-                                     int(self.ui.splitter.size().width() * 0.8)])
+                                       int(self.ui.splitter.size().width() * 0.8)])
             widget.show()
-            #widget.layout.invalidate()
+            #widget.layout.update()
+            #widget.layout.activate()
         else:
             widget.hide()
 
@@ -222,10 +218,12 @@ class Cannibal(QMainWindow):
         return QMessageBox.question(self, title, content,
                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
     
-    def setDirty(self, dirty):
+    def setDirty(self, dirty, reLoad=False):
         self.isDirty = dirty
         title = "Cannibal"
         if self.isOpen:
+            if reLoad:
+                self.page = self.pdf.reloadPage(self.page)
             title = " - " + title
             if self.isDirty:
                 title = " *" + title
@@ -279,7 +277,7 @@ class Cannibal(QMainWindow):
             self.resetPreview()
             self.firstPage()
             self.isOpen = True
-            if (ret == 2) or (newFile is True):
+            if (ret == 2):
                 self.setDirty(True)
             else:
                 self.setDirty(False)
@@ -303,7 +301,7 @@ class Cannibal(QMainWindow):
         """
         save the current pdf at a location selected by the user.
 
-        :return: True is saved
+        :return: True if saved
         """
 
         options = QFileDialog.Options()
@@ -367,16 +365,13 @@ class Cannibal(QMainWindow):
         return saved
 
     def print(self):
+        from printing import printPDF
         printer = QPrinter(QPrinter.HighResolution)
+        printer.setFromTo(1, self.pageCount)
         printDialog = QPrintDialog(printer, self)
+        
         if printDialog.exec_() == QDialog.Accepted:
-            print("Dialog: %s" % printDialog.printer().printerName())
-            conn = cups.Connection()
-            printers = conn.getPrinters()
-            for printer in printers:
-                print(printer, printers[printer]["device-uri"])
-            #conn.printFile(printer_name,'/home/pi/Desktop/tempprint.jpg',"Hello",{})
-            pass
+            printPDF(printer, self.pdf, self.fileName)
         
     def showPage(self):
         """
@@ -386,9 +381,6 @@ class Cannibal(QMainWindow):
         self.page = self.pdf.getPage(self.pageNum)
         self.ui.pdfView.showPage(self.page)
         self.currPage.setText(str(self.pageNum+1))
-        for field in self.page.widgets():
-                print( field.xref)
-        print("")
         
     def thumbChange(self, current, previous):
         """
@@ -449,17 +441,30 @@ class Cannibal(QMainWindow):
         except:
             pass
         
+    def thumbDropped(self, index):
+        if index == self.pageNum:
+            pass
+        self.pageNum = self.pdf.movePage(self.pageNum, index)
+        self.resetPreview()
+        self.setDirty(True)
+        
     def deletePage(self):
         self.pdf.deletePage(self.pageNum)
         self.pageCount = self.pdf.getPageCount()
+        if self.pageNum >= self.pageCount:
+            self.pageNum = self.pageCount - 1
+        self.setPage(self.pageNum)
         self.setDirty(True)
 
     def insertPage(self):
         self._insertPage(self.pageNum)
-        self.setDirty(True)
         
     def appendPage(self):
         self._insertPage(-1)
+        
+    def cleanPage(self):
+        self.page.cleanContents()
+        self.setDirty(True)
         
     def _insertPage(self, pageNum):
         self.pdf.insertPage(pageNum)
@@ -544,12 +549,12 @@ class Cannibal(QMainWindow):
         check wjether mouse is over a form widget
         """
         if self.mode is None:
-            p = fitz.Point(x,y)
+            p = fitz.Point(x, y)
             inField = False
             for field in self.page.widgets():
                 if field.rect.contains(p):
                     inField = True
-                    break;
+                    break
             if inField is True:
                 return field
         return None
@@ -559,7 +564,7 @@ class Cannibal(QMainWindow):
         self.setDirty(True)
         self.showPage()
 
-    def mapToGlobal(self, x, y):
+    def mapToScreen(self, x, y):
         """
         convert pdf coordinates to absolute screen cordinates
         """
@@ -577,14 +582,14 @@ class Cannibal(QMainWindow):
             field.field_value = False if field.field_value == "Yes" else True
             self.updateField(field)
         elif field.field_type == fitz.PDF_WIDGET_TYPE_TEXT:
-            pg = self.mapToGlobal(field.rect.x0, field.rect.y0)
+            pg = self.mapToScreen(field.rect.x0, field.rect.y0)
             dlg = EditFormText(pg, field.field_value)
             if dlg.exec() == QDialog.Accepted:
                 field.field_value = dlg.getText()
                 self.updateField(field)
         elif field.field_type == fitz.PDF_WIDGET_TYPE_COMBOBOX:
             print("Combo FLags %s" % (hex(field.field_flags),))
-            pg = self.mapToGlobal(field.rect.x0, field.rect.y0)
+            pg = self.mapToScreen(field.rect.x0, field.rect.y0)
             dlg = EditFormList(pg)
             dlg.fillList(field.choice_values)
             dlg.setText(field.field_value)
@@ -605,7 +610,7 @@ class Cannibal(QMainWindow):
     def doInsert_Sign(self, x0, y0, x1, y1):
         # Todo: get signature data dialog
         self.pdf.addSignature(self.page, x0, y0, x1, y1)
-        self.setDirty(True)
+        self.setDirty(True, True)
         self.pdf.savePdf("testsig.pdf")
         
     def insertForm(self):
@@ -619,7 +624,7 @@ class Cannibal(QMainWindow):
         :return: -
         """
         self.pdf.addTextForm(self.page, x0, y0, x1, y1, self.page.rotation)
-        self.setDirty(True)
+        self.setDirty(True, True)
         
     def insertText(self):
         self.changeMode("Text")
@@ -706,7 +711,6 @@ class Cannibal(QMainWindow):
         self.showMsgbox(aboutText.format(__version__, OS, PYTHON_VERSION, PYMUPDF_VERSION, QT_VERSION),
                         self.tr("About Cannibal"))
 
-        
     def closeEvent(self, event=None):
         """
         This event is triggered when the user closes the main window by clicking on the cross in

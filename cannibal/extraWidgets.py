@@ -22,6 +22,7 @@ along with cannibal.  If not, see <http://www.gnu.org/licenses/>.
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QComboBox
 
+
 class QComboBoxEnter(QComboBox):
     """
     A class to finish editing in a combobox with enter

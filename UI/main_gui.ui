@@ -125,6 +125,7 @@
     <addaction name="actionDelete_page"/>
     <addaction name="actionInsert_page"/>
     <addaction name="actionAppend_page"/>
+    <addaction name="actionClean_page"/>
     <addaction name="separator"/>
     <addaction name="actionInsert_document"/>
    </widget>
@@ -444,6 +445,11 @@
   <action name="actionAppend_page">
    <property name="text">
     <string>&amp;Append page</string>
+   </property>
+  </action>
+  <action name="actionClean_page">
+   <property name="text">
+    <string>&amp;Clean page</string>
    </property>
   </action>
   <action name="actionInsert_stamp">

@@ -1,54 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="2.0" language="fr" sourcelanguage="">
+<!DOCTYPE TS>
+<TS version="2.1" language="fr">
 <context>
     <name>Cannibal</name>
     <message>
-        <location filename="../cannibal.py" line="253"/>
+        <location filename="../cannibal.py" line="246"/>
         <source>Open File</source>
         <translation>Ouvrir fichier</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="253"/>
+        <location filename="../cannibal.py" line="246"/>
         <source>PDF Files (*.pdf);; All files ()</source>
         <translation>Fichiers PDF (*.pdf);; Tous les fichiers ()</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="263"/>
+        <location filename="../cannibal.py" line="256"/>
         <source>NoName</source>
         <translation>SansTitre</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="311"/>
+        <location filename="../cannibal.py" line="304"/>
         <source>Save document as</source>
         <translation>Enregistrer document sous</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="311"/>
+        <location filename="../cannibal.py" line="304"/>
         <source>PDF Files (*.pdf)</source>
         <translation>Fichiers PDF (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="332"/>
+        <location filename="../cannibal.py" line="325"/>
         <source>Save changes before closing?</source>
         <translation>Enregistrer les modifications avant de fermer?</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="332"/>
+        <location filename="../cannibal.py" line="325"/>
         <source>Close</source>
         <translation>Fermer</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="662"/>
+        <location filename="../cannibal.py" line="652"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="662"/>
+        <location filename="../cannibal.py" line="652"/>
         <source>Couldn&apos;t insert image (unknown format?)</source>
         <translation>Erreur insertion image (format inconnu?)</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="697"/>
+        <location filename="../cannibal.py" line="687"/>
         <source>&lt;br&gt;
         Annotate and sign PDF documents.&lt;br&gt;
         Version: {0}&lt;br&gt;
@@ -71,7 +72,7 @@
         Qt: {4}</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="707"/>
+        <location filename="../cannibal.py" line="697"/>
         <source>About Cannibal</source>
         <translation>À propos de Cannibal</translation>
     </message>
@@ -102,12 +103,12 @@
 <context>
     <name>InsertFileDlg</name>
     <message>
-        <location filename="../addObjects.py" line="327"/>
+        <location filename="../addObjects.py" line="326"/>
         <source>Open file</source>
         <translation>Ouvrir fichier</translation>
     </message>
     <message>
-        <location filename="../addObjects.py" line="327"/>
+        <location filename="../addObjects.py" line="326"/>
         <source>PDF Files (*.pdf);; All files ()</source>
         <translation>Fichiers PDF (*.pdf);; Tous les fichiers ()</translation>
     </message>
@@ -207,294 +208,294 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../main_gui.py" line="258"/>
+        <location filename="../main_gui.py" line="261"/>
         <source>Cannibal</source>
         <translation>Cannibal</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="259"/>
+        <location filename="../main_gui.py" line="262"/>
         <source>Signatures</source>
         <translation>Signatures</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="260"/>
+        <location filename="../main_gui.py" line="263"/>
         <source>Pages</source>
         <translation>Pages</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="261"/>
+        <location filename="../main_gui.py" line="264"/>
         <source>&amp;File</source>
         <translation>&amp;Fichier</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="262"/>
+        <location filename="../main_gui.py" line="265"/>
         <source>&amp;Edit</source>
         <translation>&amp;Édition</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="263"/>
+        <location filename="../main_gui.py" line="266"/>
         <source>&amp;View</source>
         <translation>&amp;Vue</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="264"/>
+        <location filename="../main_gui.py" line="267"/>
         <source>&amp;Signatures</source>
         <translation>&amp;Signatures</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="265"/>
+        <location filename="../main_gui.py" line="268"/>
         <source>&amp;Document</source>
         <translation>&amp;Document</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="266"/>
+        <location filename="../main_gui.py" line="269"/>
         <source>&amp;Certificates</source>
         <translation>&amp;Certificats</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="284"/>
+        <location filename="../main_gui.py" line="287"/>
         <source>&amp;Help</source>
         <translation>&amp;Aide</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="268"/>
+        <location filename="../main_gui.py" line="271"/>
         <source>toolBar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="269"/>
+        <location filename="../main_gui.py" line="272"/>
         <source>&amp;Open</source>
         <translation>&amp;Ouvrir</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="270"/>
+        <location filename="../main_gui.py" line="273"/>
         <source>Ctrl+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="271"/>
+        <location filename="../main_gui.py" line="274"/>
         <source>&amp;Close</source>
         <translation>&amp;Fermer</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="272"/>
+        <location filename="../main_gui.py" line="275"/>
         <source>&amp;Save</source>
         <translation>&amp;Enregistrer</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="273"/>
+        <location filename="../main_gui.py" line="276"/>
         <source>Ctrl+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="274"/>
+        <location filename="../main_gui.py" line="277"/>
         <source>Save &amp;as...</source>
         <translation>Enregistrer so&amp;us...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="283"/>
+        <location filename="../main_gui.py" line="286"/>
         <source>Insert &amp;image...</source>
         <translation>Insérer &amp;image...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="275"/>
+        <location filename="../main_gui.py" line="278"/>
         <source>&amp;Print...</source>
         <translation>&amp;Imprimer...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="276"/>
+        <location filename="../main_gui.py" line="279"/>
         <source>&amp;Document properties</source>
         <translation>&amp;Propriétés du document</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="277"/>
+        <location filename="../main_gui.py" line="280"/>
         <source>&amp;Quit</source>
         <translation>&amp;Quitter</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="278"/>
+        <location filename="../main_gui.py" line="281"/>
         <source>Quit</source>
         <translation>Quitter</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="279"/>
+        <location filename="../main_gui.py" line="282"/>
         <source>Ctrl+Q</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="307"/>
+        <location filename="../main_gui.py" line="310"/>
         <source>&amp;Delete page</source>
         <translation>&amp;Supprimer page</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="280"/>
+        <location filename="../main_gui.py" line="283"/>
         <source>&amp;Sign with form...</source>
         <translation>&amp;Signer avec formulaire...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="281"/>
+        <location filename="../main_gui.py" line="284"/>
         <source>S&amp;ign...</source>
         <translation>S&amp;igner...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="282"/>
+        <location filename="../main_gui.py" line="285"/>
         <source>Insert &amp;text...</source>
         <translation>Insérer &amp;texte...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="293"/>
-        <source>&amp;Minimize</source>
-        <translation type="obsolete">&amp;Réduire</translation>
-    </message>
-    <message>
-        <location filename="../main_gui.py" line="285"/>
+        <location filename="../main_gui.py" line="288"/>
         <source>&amp;About</source>
         <translation>À &amp;propos</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="286"/>
+        <location filename="../main_gui.py" line="289"/>
         <source>Zoom original</source>
         <translation>Zoom original</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="288"/>
+        <location filename="../main_gui.py" line="291"/>
         <source>Zoom fit best</source>
         <translation>Zoom optimal</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="289"/>
+        <location filename="../main_gui.py" line="292"/>
         <source>Zoom in</source>
         <translation>Zoom avant</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="291"/>
+        <location filename="../main_gui.py" line="294"/>
         <source>Zoom out</source>
         <translation>Zoom arrière</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="293"/>
+        <location filename="../main_gui.py" line="296"/>
         <source>&amp;First page</source>
         <translation>&amp;Première page</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="294"/>
+        <location filename="../main_gui.py" line="297"/>
         <source>Ctrl+Home</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="295"/>
+        <location filename="../main_gui.py" line="298"/>
         <source>&amp;Previous page</source>
         <translation>Page p&amp;récédente</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="296"/>
+        <location filename="../main_gui.py" line="299"/>
         <source>PgUp</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="297"/>
+        <location filename="../main_gui.py" line="300"/>
         <source>&amp;Next page</source>
         <translation>Page &amp;suivante</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="298"/>
+        <location filename="../main_gui.py" line="301"/>
         <source>PgDown</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="299"/>
+        <location filename="../main_gui.py" line="302"/>
         <source>L&amp;ast page</source>
         <translation>Der&amp;nière page</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="300"/>
+        <location filename="../main_gui.py" line="303"/>
         <source>Ctrl+End</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="303"/>
+        <location filename="../main_gui.py" line="306"/>
         <source>Rotate &amp;left</source>
         <translation>Tourner à &amp;gauche</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="301"/>
+        <location filename="../main_gui.py" line="304"/>
         <source>Find</source>
         <translation>Chercher</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="302"/>
+        <location filename="../main_gui.py" line="305"/>
         <source>&amp;Manage certificates...</source>
         <translation>&amp;Gérer les cerfificates...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="304"/>
+        <location filename="../main_gui.py" line="307"/>
         <source>Ctrl+L</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="305"/>
+        <location filename="../main_gui.py" line="308"/>
         <source>Rotate &amp;right</source>
         <translation>Tourner à &amp;droite</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="306"/>
+        <location filename="../main_gui.py" line="309"/>
         <source>Ctrl+R</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="308"/>
+        <location filename="../main_gui.py" line="311"/>
         <source>Ctrl+Del</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="309"/>
+        <location filename="../main_gui.py" line="312"/>
         <source>&amp;Insert page</source>
         <translation>&amp;Insérer page</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="310"/>
+        <location filename="../main_gui.py" line="313"/>
         <source>Ctrl+Ins</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="311"/>
+        <location filename="../main_gui.py" line="314"/>
         <source>&amp;Append page</source>
         <translation>&amp;Attacher page</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="312"/>
+        <location filename="../main_gui.py" line="316"/>
         <source>Insert s&amp;tamp...</source>
         <translation>Insérer &amp;tampon...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="313"/>
+        <location filename="../main_gui.py" line="317"/>
         <source>Insert &amp;form...</source>
         <translation>Insérer &amp;formulaire...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="314"/>
+        <location filename="../main_gui.py" line="318"/>
         <source>Insert &amp;document...</source>
         <translation>Insérer &amp;document...</translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="287"/>
+        <location filename="../main_gui.py" line="290"/>
         <source>Ctrl+0</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="290"/>
+        <location filename="../main_gui.py" line="293"/>
         <source>Ctrl++</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="292"/>
+        <location filename="../main_gui.py" line="295"/>
         <source>Ctrl+-</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../main_gui.py" line="315"/>
+        <location filename="../main_gui.py" line="319"/>
         <source>&amp;New</source>
         <translation>&amp;Noveau</translation>
+    </message>
+    <message>
+        <location filename="../main_gui.py" line="315"/>
+        <source>&amp;Clean page</source>
+        <translation>&amp;Ranger page</translation>
     </message>
 </context>
 </TS>

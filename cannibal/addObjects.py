@@ -36,6 +36,7 @@ from addStamp import Ui_InsertStamp
 from addFile import Ui_InsertFile
 from pdfTools import PdfDoc
 
+
 class InsertTextDlg(QDialog):
     """
     A class to show a dialog where the user can enter text to be inserted 
@@ -150,7 +151,6 @@ class InsertImageDlg(QDialog):
                 self.setFileName(fileName)
         except:
             pass
-
 
     def chooseFile(self):
         # Open the file dialog
@@ -320,7 +320,6 @@ class InsertFileDlg(QDialog):
                 self.setFileName(fileName)
         except:
             pass
-
 
     def chooseFile(self):
         # Open the file dialog

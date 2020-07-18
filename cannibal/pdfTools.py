@@ -2,7 +2,7 @@
 """
 Copyright (c) 2020 Felix Huber
 
-pdfTool.py: herlper functions for PDF file manipulation using pymuPDF
+pdfTool.py: helper functions for PDF file manipulation using pymuPDF
 
 pdfTool.py is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -77,21 +77,16 @@ class PdfDoc:
             pass
         if self.doc is None:
             ret = 0
+        self.textNum = 0
         return ret
                     
     def printSignatures(self):
-        #return
         if self.doc is not None:
             for page in self.doc:
-                for field in page.widgets(types=(fitz.PDF_WIDGET_TYPE_TEXT,)):
-                    print("Text Name: %s, rect: %s, Label: %s, Value: %s, flags: %s, xref: %s" %  (field.field_name, field.rect,
-                        field.field_label, field.field_value,
-                        field.field_flags, field.xref))
                 for field in page.widgets(types=(fitz.PDF_WIDGET_TYPE_SIGNATURE,)):
                     print("Signature Name: %s, rect: %s, signed %s, flags: %s, xref: %s" %
                         (field.field_name, field.rect, field.is_signed,
                         field.field_flags, field.xref))
-            return field.rect
 
     def isNewPdf(self):
         if not self.doc.name:
@@ -122,7 +117,7 @@ class PdfDoc:
             if fileName is None:
                 self.doc.save(self.doc.name, incremental=True, encryption=fitz.PDF_ENCRYPT_KEEP)
             else:
-                self.doc.save(fileName, incremental=False, encryption=fitz.PDF_ENCRYPT_KEEP)
+                self.doc.save(fileName, incremental=False, encryption=fitz.PDF_ENCRYPT_KEEP, deflate=True, garbage=3)
 
     def metadata(self):
         """
@@ -143,7 +138,8 @@ class PdfDoc:
         """
         Insert a new empty page.
         :param pageNum: zero-based page number, page inserted before this page
-        
+        :param w: width
+        :param h: height
         :return: -
         """
 
@@ -162,6 +158,25 @@ class PdfDoc:
             if 0 <= pageNum < self.doc.pageCount:
                 self.doc.deletePage(pageNum)
 
+    def movePage(self, src, dst):
+        """
+        Move a page.
+        :param src: zero-based page number
+        :param dst: zero-based insertion position
+        
+        :return: -
+        """
+
+        if self.doc is not None:
+            if dst >= self.doc.pageCount:
+                d = -1
+            else:
+                d = dst
+            self.doc.movePage(src, d)
+            return dst - 1 if dst > src else dst 
+        return 0
+            
+
     def getPage(self, pageNum):
         """
         Return a pymupdf page object.
@@ -175,6 +190,18 @@ class PdfDoc:
                 return self.doc.loadPage(pageNum)
         return None
 
+    def reloadPage(self, page):
+        """
+        Reload a page to update widgets etc.
+        :param page: current page
+        
+        :return: page object
+        """
+
+        if page is not None:
+            return self.doc.reload_page(page)
+        return None
+
     def getPageCount(self):
         """
         Return number of pages in doc.
@@ -184,9 +211,9 @@ class PdfDoc:
 
         return self.doc.pageCount
 
-    def insertDocument(self, doc, pageNum=-1):
+    def insertDocument(self, doc, pageNum=-1, fromPage=-1, toPage=-1):
         if self.doc is not None:
-            self.doc.insertPDF(doc, start_at=pageNum)
+            self.doc.insertPDF(doc, from_page=fromPage, to_page=toPage, start_at=pageNum)
 
     def addText(self, page, x0, y0, x1, y1, text, fontsize, fontname, allPages=False, doQR=False, direction=0):
         """
@@ -220,8 +247,7 @@ class PdfDoc:
             os.close(fd)
             os.remove(fileName)
         else:
-            #rect = fitz.Rect(fitz.TOOLS._derotate_rect(page, fitz.Rect(x0, y0, x1, y1)))
-            rect = fitz.Rect(x0, y0, x1, y1)
+            rect = fitz.Rect(x0, y0, x1, y1) * page.derotationMatrix
             if allPages is True:
                 count = 1
                 for page in self.doc:
@@ -232,14 +258,14 @@ class PdfDoc:
                     except:
                         text2 = text
                     page.insertTextbox(rect, text2, fontsize=int(fontsize),
-                            color=(0,0,0), fontname=fontname, rotate=direction)
+                            color=(0, 0, 0), fontname=fontname, rotate=direction)
             else:
                 try:
                     text2 = text.format(page.number+1)
                 except:
                     text2 = text
                 page.insertTextbox(rect, text2, fontsize=int(fontsize),
-                            color=(0,0,0), fontname=fontname, rotate=direction)
+                            color=(0, 0, 0), fontname=fontname, rotate=direction)
 
     def compensateRotation(self, x0, y0, x1, y1, angle):
         """
@@ -250,10 +276,13 @@ class PdfDoc:
         if angle > 45:
             angle = 90 - angle
         scale = cos(angle/180*3.14)
+        # center
         xc = (x0+x1)/2
         yc = (y0+y1)/2
+        # new radius
         xs = (x1-x0)/2/scale
         ys = (y1-y0)/2/scale
+        # new corners
         x0 = xc-xs
         x1 = xc+xs
         y0 = yc-ys
@@ -273,6 +302,7 @@ class PdfDoc:
         :param direction: direction of image in 90 degree steps
         :return: -
         """
+        
         rect = fitz.Rect(x0, y0, x1, y1)
         try:
             if int(Angle) != 0:
@@ -289,6 +319,7 @@ class PdfDoc:
                 os.remove(tempName)
             else:
                 pixmap = fitz.Pixmap(fileName)
+            rect = rect * page.derotationMatrix
             if allPages is True:
                 for page in self.doc:
                     page.insertImage(rect, pixmap=pixmap, overlay=True, rotate=direction)
@@ -308,34 +339,33 @@ class PdfDoc:
         :return: -
         """
         
-        widget = fitz.Widget()                 # create a new empty widget object
+        widget = fitz.Widget()      
         widget.field_type = fitz.PDF_WIDGET_TYPE_TEXT
         widget.field_name = "Textfield%s" % self.textNum
         widget.border_color = (0.7,)
-        widget.border_width = (1)
+        widget.border_width = 1
         widget.fill_color = (0.98,)
         self.textNum += 1
-        #widget.flags = 4096
         widget.text_fontsize = 11
         widget.field_value = "Text"
         
-        rect = fitz.Rect(x0, y0, x1, y1)
-        page.setRotation(0)
-        widget.rect = rect  # where to locate the field
+        rect = fitz.Rect(x0, y0, x1, y1) * page.derotationMatrix
+        widget.rect = rect  
         page.addWidget(widget)         # add the widget
-        page.setRotation(rotation)
 
     def addSignature(self, page, x0, y0, x1, y1):
         """
         Unfinished. Needs signature support in pymupdf
         """
         
-        widget = fitz.Widget()                 # create a new empty widget object
-        widget.rect = fitz.Rect(x0, y0, x1, y1)  # where to locate the field
+        widget = fitz.Widget()      
+        rect = fitz.Rect(x0, y0, x1, y1)  * page.derotationMatrix
+        widget.rect = rect          
         widget.field_type = fitz.PDF_WIDGET_TYPE_SIGNATURE
         widget.field_name = "Signature1"
         widget.field_value = "Reference goes here"
         page.addWidget(widget)         # add the widget
+
 
 if __name__ == '__main__':
         
@@ -345,10 +375,10 @@ if __name__ == '__main__':
     pdf.insertPage(0)
     pdf.insertPage(1)
     page = pdf.getPage(0)
-    pdf.addText(page, 100,100, 200,200, "Text", 12, "Helv", allPages=True)
-    pdf.addText(page, 150,100, 200,200, "QR\nCode", 12, "Helv", allPages=True, doQR=True)
+    pdf.addText(page, 100, 100, 200, 200, "Text", 12, "Helv", allPages=True)
+    pdf.addText(page, 150, 100, 200, 200, "QR\nCode", 12, "Helv", allPages=True, doQR=True)
     page = pdf.getPage(1)
-    pdf.addSignature(page, 50,50, 150,100)
+    pdf.addSignature(page, 50, 50, 150, 100)
     pdf.savePdf("testsig.pdf")
     pdf.closePdf()
     pdf.openPdf("testsig.pdf")

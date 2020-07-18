@@ -16,7 +16,7 @@ files = ["icons/*", "i18n/*.qm", "stamps/**/*"]
 
 setup(
     name = "cannibal",
-    version = "0.36.9",
+    version = "0.36.15",
     description = "PDF file viewer and annotator",
     long_description=long_description,
     long_description_content_type='text/markdown',

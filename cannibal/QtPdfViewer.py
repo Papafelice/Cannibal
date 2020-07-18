@@ -228,8 +228,8 @@ class PdfViewer(ImgViewer):
             scaleX = self.size().width() / self.page.rect.width
             scaleY = self.size().height() / self.page.rect.height
             self.scale = scaleY if scaleY < scaleX else scaleX
-            #fixme generates lockup due to scroll bars
-            #self.bestScale = scaleX
+            # fixme generates lockup due to scroll bars
+            # self.bestScale = scaleX
             self.bestScale = self.scale
             
             self.setImage(_renderPage(self.page, self.zoom*self.scale))
@@ -254,6 +254,7 @@ class ThumbList(QListWidget):
     
     scrollUp = pyqtSignal()
     scrollDown = pyqtSignal()
+    dropped = pyqtSignal(int)
     
     def __init__(self, parent=None, thumbSize=200):
         """
@@ -264,6 +265,9 @@ class ThumbList(QListWidget):
         
         self.setThumbSize(thumbSize)
         self.setResizeMode(QListView.Adjust)
+        self.setAcceptDrops(True) 
+        self.setDragEnabled(True)
+
         
     def setThumbSize(self, size):
         """
@@ -323,6 +327,13 @@ class ThumbList(QListWidget):
         else:
             self.scrollDown.emit()
 
+    def dropMimeData(self, index, data, action):
+        """
+        emit index of drop position, but don't change list yet
+        """
+        self.dropped.emit(index)
+        return False
+       
 
 if __name__ == '__main__':
     # Demo for handling mouse clicks.
