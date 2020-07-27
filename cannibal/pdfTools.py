@@ -187,7 +187,11 @@ class PdfDoc:
 
         if self.doc is not None:
             if 0 <= pageNum < self.doc.pageCount:
-                return self.doc.loadPage(pageNum)
+                page = self.doc.loadPage(pageNum)
+                # work around windows PDF writer bug
+                if not page._isWrapped:
+                    page._wrapContents()
+                return page
         return None
 
     def reloadPage(self, page):
@@ -199,7 +203,11 @@ class PdfDoc:
         """
 
         if page is not None:
-            return self.doc.reload_page(page)
+            page = self.doc.reload_page(page)
+            # work around windows PDF writer bug
+            if not page._isWrapped:
+                page._wrapContents()
+            return page
         return None
 
     def getPageCount(self):

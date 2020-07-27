@@ -86,7 +86,11 @@ class InsertTextDlg(QDialog):
         return self.ui.userText.toPlainText()
 
     def getFontSize(self):
-        return self.ui.fontSize.toPlainText()
+        s = self.ui.fontSize.toPlainText()
+        try:
+            return int(s)
+        except:
+            return 12
     
     def getFontName(self):
         return self.ui.fontName.currentText()

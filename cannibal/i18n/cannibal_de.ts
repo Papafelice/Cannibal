@@ -1,40 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="de">
+<!DOCTYPE TS><TS version="2.0" language="de" sourcelanguage="">
 <context>
     <name>Cannibal</name>
     <message>
-        <location filename="../cannibal.py" line="304"/>
+        <location filename="../cannibal.py" line="310"/>
         <source>Save document as</source>
         <translation>Speichern unter</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="304"/>
+        <location filename="../cannibal.py" line="310"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF Dateien (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="652"/>
+        <location filename="../cannibal.py" line="668"/>
         <source>Error</source>
         <translation>Fehler</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="697"/>
+        <location filename="../cannibal.py" line="717"/>
         <source>About Cannibal</source>
         <translation>Über Cannibal</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="246"/>
+        <location filename="../cannibal.py" line="252"/>
         <source>Open File</source>
         <translation>Datei öffnen</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="325"/>
+        <location filename="../cannibal.py" line="331"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="687"/>
+        <location filename="../cannibal.py" line="707"/>
         <source>&lt;br&gt;
         Annotate and sign PDF documents.&lt;br&gt;
         Version: {0}&lt;br&gt;
@@ -57,24 +56,53 @@
         Qt: {4}</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="246"/>
+        <location filename="../cannibal.py" line="252"/>
         <source>PDF Files (*.pdf);; All files ()</source>
         <translation>PDF Dateien (*.pdf);; Alle Dateien()</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="256"/>
+        <location filename="../cannibal.py" line="262"/>
         <source>NoName</source>
         <translation>Unbenannt</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="325"/>
+        <location filename="../cannibal.py" line="331"/>
         <source>Save changes before closing?</source>
         <translation>Änderungen speichern vor dem Schließen?</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="652"/>
+        <location filename="../cannibal.py" line="668"/>
         <source>Couldn&apos;t insert image (unknown format?)</source>
         <translation>Konnte Bild nicht einfügen (unbekanntes Format?)</translation>
+    </message>
+</context>
+<context>
+    <name>CertificatesDlg</name>
+    <message>
+        <location filename="../certificates.py" line="136"/>
+        <source>Issuer</source>
+        <translation>Aussteller</translation>
+    </message>
+    <message>
+        <location filename="../certificates.py" line="139"/>
+        <source>Subject</source>
+        <translation>Inhaber</translation>
+    </message>
+    <message>
+        <location filename="../certificates.py" line="141"/>
+        <source>&lt;pre&gt;Valid from:  %s
+Valid until: %s </source>
+        <translation>&lt;pre&gt;Gültig von: %s
+Gültig bis: %s</translation>
+    </message>
+    <message>
+        <location filename="../certificates.py" line="142"/>
+        <source>&lt;pre&gt;Serial: %s
+Key-ID: %s
+FPR:    %s</source>
+        <translation>&lt;pre&gt;Seriennummer:  %s
+Schlüssel-ID:  %s
+Fingerabdruck: %s</translation>
     </message>
 </context>
 <context>

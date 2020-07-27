@@ -24,7 +24,7 @@ Part of this module was copied from
 https://github.com/Rolf-Hempel/PlanetarySystemStacker
 """
 
-__version__ = '0.36.15' 
+__version__ = '0.36.17' 
 
 import os
 from sys import exit, argv, path
@@ -46,6 +46,7 @@ from main_gui import Ui_MainWindow
 from pdfTools import PdfDoc
 from addObjects import InsertTextDlg, InsertImageDlg, InsertStampDlg, InsertFileDlg
 from formEdit import EditFormText, EditFormList
+from certificates import CertificatesDlg, ApplySigDlg
 
 
 class Cannibal(QMainWindow):
@@ -99,6 +100,7 @@ class Cannibal(QMainWindow):
             "Delete_page": "deletePage", "Insert_page": "insertPage",
             "Append_page": "appendPage", "Clean_page": "cleanPage",
             "Insert_document": "insertDocument",
+            "Manage_certificate": "manageCertificate",
             "About": "aboutCannibal"
         }
         handlers["Print"] = "print"
@@ -609,9 +611,11 @@ class Cannibal(QMainWindow):
 
     def doInsert_Sign(self, x0, y0, x1, y1):
         # Todo: get signature data dialog
-        self.pdf.addSignature(self.page, x0, y0, x1, y1)
-        self.setDirty(True, True)
-        self.pdf.savePdf("testsig.pdf")
+        dlg = ApplySigDlg(self.settings)
+        if dlg.exec() == QDialog.Accepted:
+            self.pdf.addSignature(self.page, x0, y0, x1, y1)
+            self.setDirty(True, True)
+        
         
     def insertForm(self):
         self.changeMode("Form")
@@ -691,6 +695,10 @@ class Cannibal(QMainWindow):
             else:
                 content = "---"
             self.showMsgbox(content, "Info")
+
+    def manageCertificate(self):
+        dlg = CertificatesDlg(self.settings)
+        dlg.exec()
 
     def aboutCannibal(self):
         OS = '{0} {1} {2}'.format(platform.system(), platform.release(), platform.architecture()[0])

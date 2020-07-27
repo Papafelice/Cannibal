@@ -129,7 +129,7 @@
     <addaction name="separator"/>
     <addaction name="actionInsert_document"/>
    </widget>
-   <widget class="QMenu" name="menuCertifivates">
+   <widget class="QMenu" name="menuCertificates">
     <property name="title">
      <string>&amp;Certificates</string>
     </property>
@@ -147,7 +147,7 @@
    <addaction name="menuView"/>
    <addaction name="menuSignatures"/>
    <addaction name="menuDokument"/>
-   <addaction name="menuCertifivates"/>
+   <addaction name="menuCertificates"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
