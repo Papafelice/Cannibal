@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="2.0" language="fr" sourcelanguage="">
+<!DOCTYPE TS>
+<TS version="2.1" language="fr">
 <context>
     <name>Cannibal</name>
     <message>
@@ -38,17 +39,17 @@
         <translation>Fermer</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="668"/>
+        <location filename="../cannibal.py" line="670"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="668"/>
+        <location filename="../cannibal.py" line="670"/>
         <source>Couldn&apos;t insert image (unknown format?)</source>
         <translation>Erreur insertion image (format inconnu?)</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="707"/>
+        <location filename="../cannibal.py" line="709"/>
         <source>&lt;br&gt;
         Annotate and sign PDF documents.&lt;br&gt;
         Version: {0}&lt;br&gt;
@@ -71,32 +72,37 @@
         Qt: {4}</translation>
     </message>
     <message>
-        <location filename="../cannibal.py" line="717"/>
+        <location filename="../cannibal.py" line="719"/>
         <source>About Cannibal</source>
         <translation>À propos de Cannibal</translation>
+    </message>
+    <message>
+        <location filename="../cannibal.py" line="725"/>
+        <source>help.md</source>
+        <translation></translation>
     </message>
 </context>
 <context>
     <name>CertificatesDlg</name>
     <message>
-        <location filename="../certificates.py" line="136"/>
+        <location filename="../certificates.py" line="137"/>
         <source>Issuer</source>
         <translation>délivreur</translation>
     </message>
     <message>
-        <location filename="../certificates.py" line="139"/>
+        <location filename="../certificates.py" line="140"/>
         <source>Subject</source>
         <translation>l&apos;objet</translation>
     </message>
     <message>
-        <location filename="../certificates.py" line="141"/>
+        <location filename="../certificates.py" line="142"/>
         <source>&lt;pre&gt;Valid from:  %s
-Valid until: %s </source>
+Valid until: %s</source>
         <translation>&lt;pre&gt;Valide de: %s
 Valide à: %s</translation>
     </message>
     <message>
-        <location filename="../certificates.py" line="142"/>
+        <location filename="../certificates.py" line="143"/>
         <source>&lt;pre&gt;Serial: %s
 Key-ID: %s
 FPR:    %s</source>
@@ -131,12 +137,12 @@ Empr. dig:    %s</translation>
 <context>
     <name>InsertFileDlg</name>
     <message>
-        <location filename="../addObjects.py" line="326"/>
+        <location filename="../addObjects.py" line="330"/>
         <source>Open file</source>
         <translation>Ouvrir fichier</translation>
     </message>
     <message>
-        <location filename="../addObjects.py" line="326"/>
+        <location filename="../addObjects.py" line="330"/>
         <source>PDF Files (*.pdf);; All files ()</source>
         <translation>Fichiers PDF (*.pdf);; Tous les fichiers ()</translation>
     </message>
@@ -167,12 +173,12 @@ Empr. dig:    %s</translation>
 <context>
     <name>InsertImageDlg</name>
     <message>
-        <location filename="../addObjects.py" line="157"/>
+        <location filename="../addObjects.py" line="161"/>
         <source>Open image</source>
         <translation>Ouvrir image</translation>
     </message>
     <message>
-        <location filename="../addObjects.py" line="157"/>
+        <location filename="../addObjects.py" line="161"/>
         <source>Images (*.png *.jpg *.bmp);; All files ()</source>
         <translation>Images (*.png *.jpg *.bmp);; Toutes les images ()</translation>
     </message>

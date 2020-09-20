@@ -12,11 +12,11 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-files = ["icons/*", "i18n/*.qm", "stamps/**/*"]
+files = ["icons/*", "i18n/*.qm", "stamps/**/*", "help/*.md"]
 
-setup(
+setup(  
     name = "cannibal",
-    version = "0.36.17",
+    version = "0.36.18",
     description = "PDF file viewer and annotator",
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -33,7 +33,7 @@ setup(
     python_requires='>=3.6',
     install_requires=[
           'pyqt5',
-          'pymupdf>=1.17.2',
+          'pymupdf>=1.17.4',
           'pyqrcode',
           'pypng'
     ],

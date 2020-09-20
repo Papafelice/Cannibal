@@ -24,7 +24,7 @@ Part of this module was copied from
 https://github.com/Rolf-Hempel/PlanetarySystemStacker
 """
 
-__version__ = '0.36.17' 
+__version__ = '0.36.18' 
 
 import os
 from sys import exit, argv, path
@@ -101,7 +101,7 @@ class Cannibal(QMainWindow):
             "Append_page": "appendPage", "Clean_page": "cleanPage",
             "Insert_document": "insertDocument",
             "Manage_certificate": "manageCertificate",
-            "About": "aboutCannibal"
+            "About": "aboutCannibal", "Help": "help"
         }
         handlers["Print"] = "print"
 
@@ -230,7 +230,7 @@ class Cannibal(QMainWindow):
             if self.isDirty:
                 title = " *" + title
             title = self.fileName + title
-            self.resetPreview()
+            self.resetPreview(self.pageNum)
                 
         self.setWindowTitle(title)
 
@@ -264,6 +264,7 @@ class Cannibal(QMainWindow):
             self.filePath, self.fileName = os.path.split(fileName) 
             
         ret = self.pdf.openPdf(fileName)
+
         if ret != 0:                                    
             # Show the signature tree
             self.showWidget(self.ui.tabs, pos=0)
@@ -271,19 +272,19 @@ class Cannibal(QMainWindow):
             self.showWidget(self.ui.pdfView, pos=1)
             # Activate GUI elements
             self.activateGuiElements(self.guiElements, True)
-
+    
             if newFile:
                 self.pdf.insertPage(0)
+            self.pageNum = 0;
             self.pageCount = self.pdf.getPageCount()
             self.ui.pdfView.clear()
-            self.resetPreview()
-            self.firstPage()
+            self.resetPreview(None)
             self.isOpen = True
             if (ret == 2):
                 self.setDirty(True)
             else:
                 self.setDirty(False)
-            
+           
     def savePdf(self):
         """
         save the current pdf at its original location
@@ -404,11 +405,11 @@ class Cannibal(QMainWindow):
             page = self.pdf.getPage(i)            
             self.ui.thumbs.setThumbImage(i, page)
 
-    def resetPreview(self):
+    def resetPreview(self, pageNum = None):
         """
         fill the preview list with thumbnails of pages
         """
-        self.ui.thumbs.resetPreview(self.pageCount, self.pageNum)
+        self.ui.thumbs.resetPreview(self.pageCount, pageNum)
         self.fillPreview()
 
     def setPage(self, pNum):
@@ -447,7 +448,7 @@ class Cannibal(QMainWindow):
         if index == self.pageNum:
             pass
         self.pageNum = self.pdf.movePage(self.pageNum, index)
-        self.resetPreview()
+        self.resetPreview(self.pageNum)
         self.setDirty(True)
         
     def deletePage(self):
@@ -548,7 +549,7 @@ class Cannibal(QMainWindow):
 
     def findField(self, x, y):
         """
-        check wjether mouse is over a form widget
+        check whether mouse is over a form widget
         """
         if self.mode is None:
             p = fitz.Point(x, y)
@@ -564,7 +565,6 @@ class Cannibal(QMainWindow):
     def updateField(self, field):
         field.update()
         self.setDirty(True)
-        self.showPage()
 
     def mapToScreen(self, x, y):
         """
@@ -667,7 +667,8 @@ class Cannibal(QMainWindow):
                                 dlg.getAllPages(), 0, self.page.rotation)
                 self.setDirty(True)
             except:
-                QMessageBox.question(self, self.tr("Error"), self.tr("Couldn't insert image (unknown format?)"),
+                QMessageBox.question(self, self.tr("Error"),
+                                     self.tr("Couldn't insert image (unknown format?)"),
                                      QMessageBox.Ok, QMessageBox.Ok)
 
     def insertStamp(self):
@@ -718,6 +719,12 @@ class Cannibal(QMainWindow):
         Qt: {4}''')
         self.showMsgbox(aboutText.format(__version__, OS, PYTHON_VERSION, PYMUPDF_VERSION, QT_VERSION),
                         self.tr("About Cannibal"))
+
+    def help(self):
+        from subprocess import call
+        prg = os.path.join(self.progPath, "showhelp.py")
+        hlp = os.path.join(self.progPath, "help", self.tr("help.md")) 
+        call(["python3", prg, hlp])
 
     def closeEvent(self, event=None):
         """

@@ -46,6 +46,7 @@ class ImgViewer(QGraphicsView):
     leftMouseButtonPressed = pyqtSignal(float, float)
     leftMouseButtonReleased = pyqtSignal(float, float)
     leftMouseRectReleased = pyqtSignal(float, float, float, float)
+    rightMouseButtonReleased = pyqtSignal(float, float)
     
     def __init__(self, parent=None):
         """
@@ -140,6 +141,8 @@ class ImgViewer(QGraphicsView):
                     int(rect.y()/self.zoom/self.scale),
                     int((rect.x()+rect.width())/self.zoom/self.scale),
                     int((rect.y()+rect.height())/self.zoom/self.scale))
+        elif event.button() == Qt.RightButton:
+            self.rightMouseButtonReleased.emit(imgPos.x(), imgPos.y())
             
     def setImage(self, image):
         """ Set the scene's current image.
@@ -316,7 +319,8 @@ class ThumbList(QListWidget):
             item = QListWidgetItem(str(i+1))
             item.setSizeHint(QSize(item.sizeHint().width(), self.thumbSize))
             self.addItem(item)
-        self.setCurrentRow(pageNum)
+        if pageNum is not None:
+            self.setCurrentRow(pageNum)
 
     def wheelEvent(self, wheelEvent):
         """

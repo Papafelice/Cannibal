@@ -139,7 +139,7 @@ class CertificatesDlg(QDialog):
             oid = getOIDuid(uid.uid)
             self.ui.Subject.setText(printOID(oid, self.tr("Subject"), dump=False))
             ks = k.subkeys[0]
-            self.ui.Valid.setText(self.tr("<pre>Valid from:  %s\nValid until: %s ") % (date(ks.timestamp), date(ks.expires)))
+            self.ui.Valid.setText(self.tr("<pre>Valid from:  %s\nValid until: %s") % (date(ks.timestamp), date(ks.expires)))
             self.ui.Serial.setText(self.tr("<pre>Serial: %s\nKey-ID: %s\nFPR:    %s") % (k.issuer_serial, ks.keyid, ks.fpr))
         except:
             pass
