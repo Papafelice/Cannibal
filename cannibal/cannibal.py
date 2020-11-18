@@ -24,7 +24,7 @@ Part of this module was copied from
 https://github.com/Rolf-Hempel/PlanetarySystemStacker
 """
 
-__version__ = '0.36.18' 
+__version__ = '0.36.19' 
 
 import os
 from sys import exit, argv, path
@@ -32,8 +32,8 @@ path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import platform
 
 import fitz
-if fitz.VersionBind.split(".") < ["1", "17", "2"]:
-    exit("PyMuPDF v1.17.2+ is needed.")
+if fitz.VersionBind.split(".") < ["1", "17", "4"]:
+    exit("PyMuPDF v1.17.4+ is needed.")
 
 from PyQt5 import QtGui
 from PyQt5.QtGui import QIntValidator
@@ -153,6 +153,7 @@ class Cannibal(QMainWindow):
         self.ui.pdfView.leftMouseRectReleased.connect(self.handleLeftRectRelease)
         self.ui.pdfView.leftMouseButtonReleased.connect(self.handleLeftButtonRelease)
         self.ui.pdfView.MouseMoved.connect(self.handleMouseMoved)
+        self.ui.pdfView.rightMouseButtonReleased.connect(self.handleRightButtonRelease)
 
         # Initialize variables
         self.mode = None
@@ -216,9 +217,13 @@ class Cannibal(QMainWindow):
         msgBox.setStandardButtons(QMessageBox.Ok)
         msgBox.exec()
 
-    def getConfirmation(self, content, title):
+    def getConfirmation(self, content, title, onlyYes=False):
+        if onlyYes == False:
+            mode = QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+        else:
+            mode = QMessageBox.Yes | QMessageBox.Cancel
         return QMessageBox.question(self, title, content,
-                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
+                                     mode, QMessageBox.Cancel)
     
     def setDirty(self, dirty, reLoad=False):
         self.isDirty = dirty
@@ -529,7 +534,8 @@ class Cannibal(QMainWindow):
         :return: -
         """
         field = self.findField(x, y)
-        if field is not None:
+        annot = self.findAnnot(x, y)
+        if (field is not None) or (annot is not None):
             self.setHandCursor(True)
         else:
             self.setHandCursor(False)
@@ -562,6 +568,21 @@ class Cannibal(QMainWindow):
                 return field
         return None
 
+    def findAnnot(self, x, y):
+        """
+        check whether mouse is over an annotation
+            """
+        if self.mode is None:
+            p = fitz.Point(x, y)
+            inAnnot = False
+            for annot in self.page.annots():
+                if annot.rect.contains(p):
+                    inAnnot = True
+                    break
+            if inAnnot is True:
+                return annot
+        return None
+
     def updateField(self, field):
         field.update()
         self.setDirty(True)
@@ -577,34 +598,62 @@ class Cannibal(QMainWindow):
 
     def handleLeftButtonRelease(self, x, y):
         field = self.findField(x, y)
-        if field is None:
+        annot = self.findAnnot(x, y)
+        if (field is None) and (annot is None):
             return
         self.setHandCursor(False)
-        if field.field_type == fitz.PDF_WIDGET_TYPE_CHECKBOX:
-            field.field_value = False if field.field_value == "Yes" else True
-            self.updateField(field)
-        elif field.field_type == fitz.PDF_WIDGET_TYPE_TEXT:
-            pg = self.mapToScreen(field.rect.x0, field.rect.y0)
-            dlg = EditFormText(pg, field.field_value)
-            if dlg.exec() == QDialog.Accepted:
-                field.field_value = dlg.getText()
+        if field is not None:
+            if field.field_type == fitz.PDF_WIDGET_TYPE_CHECKBOX:
+                field.field_value = False if field.field_value == "Yes" else True
                 self.updateField(field)
-        elif field.field_type == fitz.PDF_WIDGET_TYPE_COMBOBOX:
-            print("Combo FLags %s" % (hex(field.field_flags),))
-            pg = self.mapToScreen(field.rect.x0, field.rect.y0)
-            dlg = EditFormList(pg)
-            dlg.fillList(field.choice_values)
-            dlg.setText(field.field_value)
-            if dlg.exec() == QDialog.Accepted:
-                field.field_value = dlg.getText()
-                self.updateField(field)
-        elif field.field_type == fitz.PDF_WIDGET_TYPE_SIGNATURE:
-            print("Signature Name: %s, signed %s, value: %s, flags: %s, xref: %s" %
-                (field.field_name, field.is_signed, field.field_value, field.field_flags, field.xref))
-            doc = self.pdf.getDoc()
-            print(doc.xrefObject(field.xref, compressed=False))
-        else:
-            print("Field type %s unimplemented" % field.field_type)
+            elif field.field_type == fitz.PDF_WIDGET_TYPE_TEXT:
+                pg = self.mapToScreen(field.rect.x0, field.rect.y0)
+                dlg = EditFormText(pg, field.field_value)
+                if dlg.exec() == QDialog.Accepted:
+                    field.field_value = dlg.getText()
+                    self.updateField(field)
+            elif field.field_type == fitz.PDF_WIDGET_TYPE_COMBOBOX:
+                print("Combo FLags %s" % (hex(field.field_flags),))
+                pg = self.mapToScreen(field.rect.x0, field.rect.y0)
+                dlg = EditFormList(pg)
+                dlg.fillList(field.choice_values)
+                dlg.setText(field.field_value)
+                if dlg.exec() == QDialog.Accepted:
+                    field.field_value = dlg.getText()
+                    self.updateField(field)
+            elif field.field_type == fitz.PDF_WIDGET_TYPE_SIGNATURE:
+                print("Signature Name: %s, signed %s, value: %s, flags: %s, xref: %s" %
+                    (field.field_name, field.is_signed, field.field_value, field.field_flags, field.xref))
+                doc = self.pdf.getDoc()
+                print(doc.xrefObject(field.xref, compressed=False))
+            else:
+                print("Field type %s unimplemented" % field.field_type)
+        elif annot is not None:
+            print(annot.type)
+            print(annot.info)
+        
+    def handleRightButtonRelease(self, x, y):
+        field = self.findField(x, y)
+        annot = self.findAnnot(x, y)
+        if (field is None) and (annot is None):
+            return
+        reply = self.getConfirmation(self.tr("Delete object?"), self.tr("Delete"), onlyYes=True)
+        if reply == QMessageBox.Yes:
+            if field is not None:
+                self.page.deleteWidget(field)
+            else:
+                self.page.deleteAnnot(annot)
+            # Fixme: Deleting a field gives xref errors when saving
+            # uncommenting the next lines seems to fix this
+            #doc = self.pdf.getDoc()
+            #bo=doc.write(garbage=3, encryption=fitz.PDF_ENCRYPT_KEEP, deflate=True, ascii=False)
+            #print(fitz.TOOLS.mupdf_warnings())
+            #print("write done")
+            #self.pdf.savePdf("AnyPdf.pdf")
+            #print(fitz.TOOLS.mupdf_warnings())
+            #print("save1 done")
+            self.setDirty(True, True)
+
         
     def sign(self):
         self.changeMode("Sign")
